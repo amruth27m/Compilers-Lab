@@ -39,10 +39,9 @@ struct sys_call_abi{
 	char sys_call_name[10];
 };
 
-void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup){
+void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup ){
 	struct sys_call_abi syscall;
 	
-
 
 	switch(syscallno){
 		case WRITE:	syscall.sys_call_number = 5;
@@ -82,8 +81,7 @@ void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup){
         fprintf(fp, "PUSH R2\n");
 
 	//push argument 2
-        fprintf(fp, "MOV R0, %d\n",syscall.arg2);
-        fprintf(fp, "PUSH R0\n");
+        fprintf(fp, "PUSH R%d\n",syscall.arg2);
 
         //push argument 3 (empty value)
         fprintf(fp, "PUSH R0\n");
