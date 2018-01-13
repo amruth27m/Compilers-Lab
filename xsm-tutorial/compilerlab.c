@@ -36,6 +36,7 @@ void write_header(FILE *opfile){
 
 struct sys_call_abi{
 	int sys_call_number,arg1,arg2,arg3,interrupt_no;
+	char sys_call_name[10];
 };
 
 void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup){
@@ -48,18 +49,21 @@ void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup){
 				syscall.arg1 = -2;
 				syscall.arg2 = arg2;
 				syscall.interrupt_no = 7;
+				strcpy(syscall.sys_call_name,"Write"); 
 			//	syscall.arg3 = 
 				break;
 		case READ:	syscall.sys_call_number = 7;
 				syscall.arg1 = -1;
 				syscall.arg2 = arg2;
 				syscall.interrupt_no = 6;
+				strcpy(syscall.sys_call_name, "Read");
 			//	syscall.arg3 = 
 				break;
 		case EXIT:	syscall.sys_call_number = 10;
 				syscall.interrupt_no = 10;
 				syscall.arg1 = 0;
 				syscall.arg2 = 0;
+				strcpy(syscall.sys_call_name, "Exit");
 				break;
 	}
 
@@ -69,8 +73,8 @@ void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup){
 		register_data_handle(PUSH,fp,0,19);
 	
 	}
-	//push system call number
-	fprintf(fp, "MOV R2, %d\n",syscall.sys_call_number);
+	//push system call name
+	fprintf(fp, "MOV R2, \"%s\"\n",syscall.sys_call_name);
         fprintf(fp, "PUSH R2\n");
 
 	//push argument 1
@@ -87,16 +91,9 @@ void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup){
         //push empty storage value
         fprintf(fp, "PUSH R0\n");
 
-	//execute system call
-        fprintf(fp, "INT %d\n",syscall.interrupt_no);
+	//transfer control to library
+        fprintf(fp, "CALL 0\n");
 
-	//pop output 
-	fprintf(fp , "POP R%d\n",opreg);
-	
-	//pop and discard argument 1-3 and system call number
-	for(int i = 0;i<4;i++){
-		fprintf(fp, "POP R%d\n",(opreg+1)%19);
-	}
 
 	if(reg_backup){
 		register_data_handle(POP,fp,0,19);

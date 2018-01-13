@@ -7,20 +7,8 @@ int main(void){
 
 	fprintf(fp, "MOV SP, 4095\n");
 	
-	fprintf(fp, "MOV R2, \"Exit\"\n");
-	fprintf(fp , "PUSH R2\n");
-
-	fprintf(fp , "MOV R2, -2\n");
-	fprintf(fp , "PUSH R2\n");
-
-	fprintf(fp, "MOV R0, 100\n");
-	fprintf(fp, "PUSH R0\n");
-
-	fprintf(fp, "PUSH R0\n");
-	fprintf(fp, "PUSH R0\n");
-
-	fprintf(fp, "CALL 0\n");
-
+	system_call(fp,5,100,0,0);
+	system_call(fp,10,0,0,0);
 	return 0;
 
 }
