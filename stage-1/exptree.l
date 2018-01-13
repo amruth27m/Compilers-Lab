@@ -2,6 +2,9 @@
 #include<stdio.h>
 #include "y.tab.h"
 #include<stdlib.h>
+#define YYSTYPE tnode*
+
+struct tnode* makeLeafNode(int num);
 int number;
 %}
 %%

@@ -472,8 +472,11 @@ char *yytext;
 #include<stdio.h>
 #include "y.tab.h"
 #include<stdlib.h>
+#define YYSTYPE tnode*
+
+struct tnode* makeLeafNode(int num);
 int number;
-#line 477 "lex.yy.c"
+#line 480 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -691,10 +694,10 @@ YY_DECL
 		}
 
 	{
-#line 7 "exptree.l"
+#line 10 "exptree.l"
 
 
-#line 698 "lex.yy.c"
+#line 701 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -753,56 +756,56 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 9 "exptree.l"
+#line 12 "exptree.l"
 { number = atoi(yytext); yylval = makeLeafNode(number); return NUM; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 10 "exptree.l"
+#line 13 "exptree.l"
 {return PLUS; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 11 "exptree.l"
+#line 14 "exptree.l"
 {return MINUS;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 12 "exptree.l"
+#line 15 "exptree.l"
 {return MUL;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 13 "exptree.l"
+#line 16 "exptree.l"
 {return DIV; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 14 "exptree.l"
+#line 17 "exptree.l"
 {}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 15 "exptree.l"
+#line 18 "exptree.l"
 {return *yytext;}
 	YY_BREAK
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
-#line 16 "exptree.l"
+#line 19 "exptree.l"
 {return END; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 17 "exptree.l"
+#line 20 "exptree.l"
 {yyerror("Unknown character\n"); exit(1);}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 18 "exptree.l"
+#line 21 "exptree.l"
 ECHO;
 	YY_BREAK
-#line 806 "lex.yy.c"
+#line 809 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1803,7 +1806,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 18 "exptree.l"
+#line 21 "exptree.l"
 
 
 int yywrap(void){

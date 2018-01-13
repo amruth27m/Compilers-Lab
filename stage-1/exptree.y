@@ -4,8 +4,6 @@
 #define YYSTYPE tnode*
 #include "exprtree.h"
 #include "exprtree.c"
-struct tnode* ans;
-
 %}
 %token NUM PLUS MINUS MUL DIV END
 %left PLUS MINUS
@@ -15,7 +13,7 @@ struct tnode* ans;
 program: expr END{
 $$ = $2;
 printf("Answer %d\n",evaluate($1));
-print_tree(stdout,$1,2);
+codeGen($1,stdout);
 exit(1);
 }
 ;
@@ -25,13 +23,15 @@ expr: expr PLUS expr{ $$ = makeOperatorNode('+' ,$1,$3);}
 	| expr MUL expr { $$ = makeOperatorNode('*',$1,$3);}
 	| expr DIV expr { $$ = makeOperatorNode('/',$1,$3);}
 	| '(' expr ')' { $$ = $2; }
-	| NUM { $$ = $1; }
+	| NUM { $$ = $1;  }
 %%
 
 void yyerror(char *s){
 	printf("%s ", s);
 }
 int main(void){
+	struct tnode* ans;
 	yyparse();
+	print_tree(stdout,ans,2);
 	return 0;
 }

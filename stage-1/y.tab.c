@@ -69,10 +69,8 @@
 #define YYSTYPE tnode*
 #include "exprtree.h"
 #include "exprtree.c"
-struct tnode* ans;
 
-
-#line 76 "y.tab.c" /* yacc.c:339  */
+#line 74 "y.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -139,7 +137,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 143 "y.tab.c" /* yacc.c:358  */
+#line 141 "y.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -437,7 +435,7 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    15,    15,    23,    24,    25,    26,    27,    28
+       0,    13,    13,    21,    22,    23,    24,    25,    26
 };
 #endif
 
@@ -1211,54 +1209,54 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 15 "exptree.y" /* yacc.c:1646  */
+#line 13 "exptree.y" /* yacc.c:1646  */
     {
 (yyval) = (yyvsp[0]);
 printf("Answer %d\n",evaluate((yyvsp[-1])));
-print_tree(stdout,(yyvsp[-1]),2);
+codeGen((yyvsp[-1]),stdout);
 exit(1);
 }
-#line 1222 "y.tab.c" /* yacc.c:1646  */
+#line 1220 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 23 "exptree.y" /* yacc.c:1646  */
+#line 21 "exptree.y" /* yacc.c:1646  */
     { (yyval) = makeOperatorNode('+' ,(yyvsp[-2]),(yyvsp[0]));}
-#line 1228 "y.tab.c" /* yacc.c:1646  */
+#line 1226 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 24 "exptree.y" /* yacc.c:1646  */
+#line 22 "exptree.y" /* yacc.c:1646  */
     { (yyval) = makeOperatorNode('-',(yyvsp[-2]),(yyvsp[0]));}
-#line 1234 "y.tab.c" /* yacc.c:1646  */
+#line 1232 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 25 "exptree.y" /* yacc.c:1646  */
+#line 23 "exptree.y" /* yacc.c:1646  */
     { (yyval) = makeOperatorNode('*',(yyvsp[-2]),(yyvsp[0]));}
-#line 1240 "y.tab.c" /* yacc.c:1646  */
+#line 1238 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 26 "exptree.y" /* yacc.c:1646  */
+#line 24 "exptree.y" /* yacc.c:1646  */
     { (yyval) = makeOperatorNode('/',(yyvsp[-2]),(yyvsp[0]));}
-#line 1246 "y.tab.c" /* yacc.c:1646  */
+#line 1244 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 27 "exptree.y" /* yacc.c:1646  */
+#line 25 "exptree.y" /* yacc.c:1646  */
     { (yyval) = (yyvsp[-1]); }
-#line 1252 "y.tab.c" /* yacc.c:1646  */
+#line 1250 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 28 "exptree.y" /* yacc.c:1646  */
-    { (yyval) = (yyvsp[0]); }
-#line 1258 "y.tab.c" /* yacc.c:1646  */
+#line 26 "exptree.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]);  }
+#line 1256 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1262 "y.tab.c" /* yacc.c:1646  */
+#line 1260 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1486,13 +1484,15 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 29 "exptree.y" /* yacc.c:1906  */
+#line 27 "exptree.y" /* yacc.c:1906  */
 
 
 void yyerror(char *s){
 	printf("%s ", s);
 }
 int main(void){
+	struct tnode* ans;
 	yyparse();
+	print_tree(stdout,ans,2);
 	return 0;
 }
