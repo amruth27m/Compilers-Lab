@@ -103,3 +103,16 @@ void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup){
 	}
 
 }
+
+
+
+void pop_after_syscall(FILE* fp,short syscallno, short op_register){
+	
+	//poping and savind return value
+	fprintf(fp,"POP R%d\n",op_register);
+	
+	//pop and discard arguments and function code
+	for(int i = 0; i<4;i++){
+		fprintf(fp, "POP R%d\n",(op_register+1)%19);
+	}
+}

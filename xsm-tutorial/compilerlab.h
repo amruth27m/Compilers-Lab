@@ -9,4 +9,6 @@ void write_header(FILE *opfile);
 
 void system_call(FILE *fp, int syscallno,int data,int opreg,int reg_backup);
 
+void pop_after_syscall(FILE* fp, short syscallno, short op_register);
+
 #endif // FOO_H_
