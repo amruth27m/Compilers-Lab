@@ -1,0 +1,148 @@
+set -e; for d in spl xfs-interface xsm_dev; do /usr/bin/make -C $d ; done
+make[1]: Entering directory '/home/amruth/Documents/compilers-lab/xsm_expl/spl'
+lex spllexer.l
+yacc -d splparser.y
+gcc -g -c lex.yy.c
+gcc -g -c y.tab.c
+y.tab.c: In function ‘yyparse’:
+y.tab.c:1331:16: warning: implicit declaration of function ‘yylex’ [-Wimplicit-function-declaration]
+       yychar = yylex ();
+                ^
+splparser.y:197:49: warning: implicit declaration of function ‘label_add’ [-Wimplicit-function-declaration]
+                                                 label_add(node_getName($1));
+                                                 ^
+y.tab.c:1912:7: warning: implicit declaration of function ‘yyerror’ [-Wimplicit-function-declaration]
+       yyerror (YY_("syntax error"));
+       ^
+gcc -g -c node.c
+gcc -g -c data.c
+gcc -g -c spl.c
+spl.c: In function ‘codegen’:
+spl.c:933:13: warning: implicit declaration of function ‘label_free’ [-Wimplicit-function-declaration]
+             label_free(l1);
+             ^
+spl.c: In function ‘main’:
+spl.c:1263:5: warning: implicit declaration of function ‘file_expandPath’ [-Wimplicit-function-declaration]
+     file_expandPath(filename);
+     ^
+spl.c:1271:5: warning: implicit declaration of function ‘file_getOpFileName’ [-Wimplicit-function-declaration]
+     file_getOpFileName(op_name, filename);
+     ^
+gcc -g -c label.c
+gcc -g -c file.c
+gcc -g -o spl  lex.yy.o y.tab.o node.o data.o spl.o label.o file.o
+make[1]: Leaving directory '/home/amruth/Documents/compilers-lab/xsm_expl/spl'
+make[1]: Entering directory '/home/amruth/Documents/compilers-lab/xsm_expl/xfs-interface'
+gcc -g  *.c -o xfs-interface -lreadline
+diskUtility.c: In function ‘disk_init’:
+diskUtility.c:42:2: warning: implicit declaration of function ‘_disk_init’ [-Wimplicit-function-declaration]
+  _disk_init();
+  ^
+diskUtility.c: In function ‘loadExecutableToDisk’:
+diskUtility.c:416:8: warning: passing argument 1 of ‘close’ makes integer from pointer without a cast [-Wint-conversion]
+  close(fileToBeLoaded);
+        ^
+In file included from diskUtility.c:9:0:
+/usr/include/unistd.h:356:12: note: expected ‘int’ but argument is of type ‘FILE * {aka struct _IO_FILE *}’
+ extern int close (int __fd);
+            ^
+diskUtility.c: In function ‘loadDataToDisk’:
+diskUtility.c:511:8: warning: passing argument 1 of ‘close’ makes integer from pointer without a cast [-Wint-conversion]
+  close(fileToBeLoaded);
+        ^
+In file included from diskUtility.c:9:0:
+/usr/include/unistd.h:356:12: note: expected ‘int’ but argument is of type ‘FILE * {aka struct _IO_FILE *}’
+ extern int close (int __fd);
+            ^
+diskUtility.c: In function ‘loadCodeWithLabels’:
+diskUtility.c:540:2: warning: implicit declaration of function ‘labels_reset’ [-Wimplicit-function-declaration]
+  labels_reset (); 
+  ^
+diskUtility.c:541:2: warning: implicit declaration of function ‘labels_resolve’ [-Wimplicit-function-declaration]
+  labels_resolve (infile, fileName, mem_page * PAGE_SIZE);
+  ^
+diskUtility.c: In function ‘loadCode’:
+diskUtility.c:579:8: warning: passing argument 1 of ‘close’ makes integer from pointer without a cast [-Wint-conversion]
+  close(fp);
+        ^
+In file included from diskUtility.c:9:0:
+/usr/include/unistd.h:356:12: note: expected ‘int’ but argument is of type ‘FILE * {aka struct _IO_FILE *}’
+ extern int close (int __fd);
+            ^
+interface.c: In function ‘runCommand’:
+interface.c:391:4: warning: implicit declaration of function ‘loadShellCode’ [-Wimplicit-function-declaration]
+    loadShellCode(fileName);    //loads init code to disk
+    ^
+interface.c:393:4: warning: implicit declaration of function ‘loadLibraryCode’ [-Wimplicit-function-declaration]
+    loadLibraryCode(fileName);    //loads init code to disk
+    ^
+interface.c:395:4: warning: implicit declaration of function ‘loadIdleCode’ [-Wimplicit-function-declaration]
+    loadIdleCode(fileName);    //loads init code to disk
+    ^
+interface.c:467:4: warning: implicit declaration of function ‘deleteFileFromDisk’ [-Wimplicit-function-declaration]
+    deleteFileFromDisk(arg1);
+    ^
+interface.c:476:3: warning: implicit declaration of function ‘exportFile’ [-Wimplicit-function-declaration]
+   exportFile(arg1,arg2);
+   ^
+interface.c:518:4: warning: implicit declaration of function ‘copyBlocksToFile’ [-Wimplicit-function-declaration]
+    copyBlocksToFile (startBlock,endBlock,fileName);
+    ^
+interface.c:527:4: warning: implicit declaration of function ‘dumpInodeTable’ [-Wimplicit-function-declaration]
+    dumpInodeTable("inodetable.txt");
+    ^
+interface.c:531:4: warning: implicit declaration of function ‘dumpRootFile’ [-Wimplicit-function-declaration]
+    dumpRootFile("rootfile.txt");
+    ^
+interface.c: In function ‘main’:
+interface.c:554:3: warning: implicit declaration of function ‘loadFileToVirtualDisk’ [-Wimplicit-function-declaration]
+   loadFileToVirtualDisk();
+   ^
+labels.c: In function ‘labels_phase_one’:
+labels.c:35:3: warning: implicit declaration of function ‘remove_newline_character’ [-Wimplicit-function-declaration]
+   remove_newline_character(instruction,ins_length);
+   ^
+labels.c: In function ‘labels_is_charstring’:
+labels.c:167:7: warning: implicit declaration of function ‘isalpha’ [-Wimplicit-function-declaration]
+   if (isalpha(*p))
+       ^
+labels.c: In function ‘labels_random_name’:
+labels.c:209:9: warning: implicit declaration of function ‘time’ [-Wimplicit-function-declaration]
+  srand (time(NULL));
+         ^
+make[1]: Leaving directory '/home/amruth/Documents/compilers-lab/xsm_expl/xfs-interface'
+make[1]: Entering directory '/home/amruth/Documents/compilers-lab/xsm_expl/xsm_dev'
+cc -g -c lex.yy.c
+lex.yy.c: In function ‘yy_get_next_buffer’:
+parse.l:21:40: warning: passing argument 2 of ‘machine_serve_instruction’ from incompatible pointer type [-Wincompatible-pointer-types]
+       machine_serve_instruction(buffer,&read_bytes,max);\
+                                        ^
+lex.yy.c:1101:3: note: in expansion of macro ‘YY_INPUT’
+   YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
+   ^
+parse.l:11:4: note: expected ‘yy_size_t * {aka long unsigned int *}’ but argument is of type ‘int *’
+    machine_serve_instruction (char *buffer, yy_size_t *read_bytes, int max);
+    ^
+cc -g -c machine.c
+machine.c: In function ‘machine_serve_instruction’:
+machine.c:148:4: warning: implicit declaration of function ‘machine_register_exception’ [-Wimplicit-function-declaration]
+    machine_register_exception("The simulator has encountered an illegal instruction", EXP_ILLINSTR);
+    ^
+machine.c: At top level:
+machine.c:156:1: warning: conflicting types for ‘machine_register_exception’
+ machine_register_exception (char* message, int code)
+ ^
+machine.c:148:4: note: previous implicit declaration of ‘machine_register_exception’ was here
+    machine_register_exception("The simulator has encountered an illegal instruction", EXP_ILLINSTR);
+    ^
+cc -g -c main.c
+cc -g -c simulator.c
+cc -g -c word.c
+cc -g -c memory.c
+cc -g -c registers.c
+cc -g -c tokenize.c
+cc -g -c disk.c
+cc -g -c debug.c
+cc -g -c exception.c
+cc -g -o xsm lex.yy.o machine.o main.o simulator.o word.o memory.o registers.o tokenize.o disk.o debug.o exception.o -ll
+make[1]: Leaving directory '/home/amruth/Documents/compilers-lab/xsm_expl/xsm_dev'
