@@ -86,8 +86,8 @@ void print_tree(FILE *fp, struct tnode *t,int type){
 
 reg_index codeGen(struct tnode *t,FILE* fp){
 	write_header(fp);
-//	int x = codeGenTree(t,fp);
-	system_call(fp,5,1,0,0);
+	int x = codeGenTree(t,fp);
+	system_call(fp,5,x,0,0);
 	system_call(fp,10,0,0,0);
 	
 }

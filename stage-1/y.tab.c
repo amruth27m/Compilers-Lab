@@ -435,7 +435,7 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    13,    13,    19,    20,    21,    22,    23
+       0,    13,    13,    20,    21,    22,    23,    24
 };
 #endif
 
@@ -1214,43 +1214,44 @@ yyreduce:
 #line 13 "exptree.y" /* yacc.c:1646  */
     {
 printf("Answer %d", evaluate((yyvsp[-1])));
+codeGen((yyvsp[-1]),stdout);
 exit(1);
 }
-#line 1220 "y.tab.c" /* yacc.c:1646  */
+#line 1221 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 19 "exptree.y" /* yacc.c:1646  */
+#line 20 "exptree.y" /* yacc.c:1646  */
     {(yyval) = makeOperatorNode('+',(yyvsp[-2]),(yyvsp[0]));}
-#line 1226 "y.tab.c" /* yacc.c:1646  */
+#line 1227 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 20 "exptree.y" /* yacc.c:1646  */
+#line 21 "exptree.y" /* yacc.c:1646  */
     {(yyval) = makeOperatorNode('-',(yyvsp[-2]),(yyvsp[0]));}
-#line 1232 "y.tab.c" /* yacc.c:1646  */
+#line 1233 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 21 "exptree.y" /* yacc.c:1646  */
+#line 22 "exptree.y" /* yacc.c:1646  */
     {(yyval) = makeOperatorNode('*',(yyvsp[-2]),(yyvsp[0]));}
-#line 1238 "y.tab.c" /* yacc.c:1646  */
+#line 1239 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 22 "exptree.y" /* yacc.c:1646  */
+#line 23 "exptree.y" /* yacc.c:1646  */
     {(yyval) = makeOperatorNode('/',(yyvsp[-2]),(yyvsp[0]));}
-#line 1244 "y.tab.c" /* yacc.c:1646  */
+#line 1245 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 23 "exptree.y" /* yacc.c:1646  */
+#line 24 "exptree.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1250 "y.tab.c" /* yacc.c:1646  */
+#line 1251 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1254 "y.tab.c" /* yacc.c:1646  */
+#line 1255 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1478,7 +1479,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 24 "exptree.y" /* yacc.c:1906  */
+#line 25 "exptree.y" /* yacc.c:1906  */
 
 
 void yyerror(char *s){

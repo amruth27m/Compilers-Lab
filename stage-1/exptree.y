@@ -12,6 +12,7 @@
 
 program: expr END{
 printf("Answer %d", evaluate($1));
+codeGen($1,stdout);
 exit(1);
 }
 ;
