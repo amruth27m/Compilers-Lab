@@ -11,16 +11,16 @@
 %%
 
 program: expr END{
-printf("successfully parsed");
+printf("Answer %d", evaluate($1));
 exit(1);
 }
 ;
 
-expr: PLUS ' ' expr ' ' expr{}
-	| MINUS ' ' expr ' ' expr {}
-	| MUL ' ' expr ' ' expr {}
-	| DIV ' ' expr ' ' expr {}
-	| NUM {}
+expr: PLUS ' ' expr ' ' expr{$$ = makeOperatorNode('+',$3,$5);}
+	| MINUS ' ' expr ' ' expr {$$ = makeOperatorNode('-',$3,$5);}
+	| MUL ' ' expr ' ' expr {$$ = makeOperatorNode('*',$3,$5);}
+	| DIV ' ' expr ' ' expr {$$ = makeOperatorNode('/',$3,$5);}
+	| NUM {$$ = $1;}
 %%
 
 void yyerror(char *s){
@@ -29,6 +29,5 @@ void yyerror(char *s){
 int main(void){
 	struct tnode* ans;
 	yyparse();
-	print_tree(stdout,ans,2);
 	return 0;
 }

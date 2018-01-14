@@ -757,7 +757,7 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 YY_RULE_SETUP
 #line 12 "exptree.l"
-{ number = atoi(yytext);  return NUM; }
+{ number = atoi(yytext); yylval = makeLeafNode(number);  return NUM; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP

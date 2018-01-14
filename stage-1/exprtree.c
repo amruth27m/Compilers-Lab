@@ -18,7 +18,6 @@ void freeReg(){
 }
 
 struct tnode* makeLeafNode(int n){
-	printf("leaf");
 	struct tnode* temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	temp->op = NULL;
@@ -29,7 +28,6 @@ struct tnode* makeLeafNode(int n){
 }
 
 struct tnode* makeOperatorNode(char c, struct tnode *l, struct tnode* r){
-	printf("operator");
 	struct tnode *temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	temp->op = malloc(sizeof(char));

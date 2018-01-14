@@ -9,7 +9,7 @@ int number;
 %}
 %%
 
-[0-9]+ { number = atoi(yytext);  return NUM; }
+[0-9]+ { number = atoi(yytext); yylval = makeLeafNode(number);  return NUM; }
 "+" {return PLUS; }
 "-" {return MINUS;}
 "*" {return MUL;}

@@ -1213,7 +1213,7 @@ yyreduce:
         case 2:
 #line 13 "exptree.y" /* yacc.c:1646  */
     {
-printf("successfully parsed");
+printf("Answer %d", evaluate((yyvsp[-1])));
 exit(1);
 }
 #line 1220 "y.tab.c" /* yacc.c:1646  */
@@ -1221,31 +1221,31 @@ exit(1);
 
   case 3:
 #line 19 "exptree.y" /* yacc.c:1646  */
-    {}
+    {(yyval) = makeOperatorNode('+',(yyvsp[-2]),(yyvsp[0]));}
 #line 1226 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
 #line 20 "exptree.y" /* yacc.c:1646  */
-    {}
+    {(yyval) = makeOperatorNode('-',(yyvsp[-2]),(yyvsp[0]));}
 #line 1232 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
 #line 21 "exptree.y" /* yacc.c:1646  */
-    {}
+    {(yyval) = makeOperatorNode('*',(yyvsp[-2]),(yyvsp[0]));}
 #line 1238 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
 #line 22 "exptree.y" /* yacc.c:1646  */
-    {}
+    {(yyval) = makeOperatorNode('/',(yyvsp[-2]),(yyvsp[0]));}
 #line 1244 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
 #line 23 "exptree.y" /* yacc.c:1646  */
-    {}
+    {(yyval) = (yyvsp[0]);}
 #line 1250 "y.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1487,6 +1487,5 @@ void yyerror(char *s){
 int main(void){
 	struct tnode* ans;
 	yyparse();
-	print_tree(stdout,ans,2);
 	return 0;
 }
