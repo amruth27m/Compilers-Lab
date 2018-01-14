@@ -13,6 +13,8 @@ extern int ylineno;
 
 program: BEG '\n' slist END '\n'{    
 printf("Evaluation successfully completed");
+$$ = $3;
+print_exp_tree($$);
 exit(1);
 }
 	| BEG END  {

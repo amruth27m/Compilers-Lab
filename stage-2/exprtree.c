@@ -262,6 +262,7 @@ struct tnode* createTreeNode(int val, int type, char c, struct tnode *l, struct 
 			temp->right = r;
 			break;
 		case 3: temp->val = 0;
+			temp->type = 3;
 			temp->nodetype = 'b';
 			temp->left = l;
 			temp->right = r;
@@ -271,4 +272,28 @@ struct tnode* createTreeNode(int val, int type, char c, struct tnode *l, struct 
 	}
 
 	return temp;
+}
+
+void print_exp_tree(struct tnode* t){
+	if(t == NULL){
+		return;
+	}
+	switch(t->type){
+		case 0:	printf("%d ",t->val);
+			break;
+		case 1:	printf("%c ",*(t->varname));
+			break;
+
+		case 2: printf("%c ", t->nodetype);
+			print_exp_tree(t->left);
+			print_exp_tree(t->right);
+			break;
+		case 3: printf(" Emprty node ");
+			print_exp_tree(t->left);
+			print_exp_tree(t->right);
+			break;
+
+	
+	}	
+
 }
