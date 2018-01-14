@@ -9,13 +9,14 @@ int number;
 %}
 %%
 
-[0-9]+ { number = atoi(yytext); yylval = makeLeafNode(number); return NUM; }
+[0-9]+ { number = atoi(yytext);  return NUM; }
 "+" {return PLUS; }
 "-" {return MINUS;}
 "*" {return MUL;}
 "/" {return DIV; }
 [\t] {}
 [()] {return *yytext;}
+[ ] { return *yytext;}
 [\n] {return END; }
 . {yyerror("Unknown character\n"); exit(1);}
 %%

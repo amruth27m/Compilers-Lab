@@ -18,6 +18,7 @@ void freeReg(){
 }
 
 struct tnode* makeLeafNode(int n){
+	printf("leaf");
 	struct tnode* temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	temp->op = NULL;
@@ -28,6 +29,7 @@ struct tnode* makeLeafNode(int n){
 }
 
 struct tnode* makeOperatorNode(char c, struct tnode *l, struct tnode* r){
+	printf("operator");
 	struct tnode *temp;
 	temp = (struct tnode*)malloc(sizeof(struct tnode));
 	temp->op = malloc(sizeof(char));
@@ -86,8 +88,9 @@ void print_tree(FILE *fp, struct tnode *t,int type){
 
 reg_index codeGen(struct tnode *t,FILE* fp){
 	write_header(fp);
-	int x = codeGenTree(t,fp);
-	system_call(fp,5,x,0,0);
+//	int x = codeGenTree(t,fp);
+	system_call(fp,5,1,0,0);
+	system_call(fp,10,0,0,0);
 	
 }
 
@@ -201,11 +204,11 @@ void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup ){
 
         //push system call name
         fprintf(fp, "MOV R%d, \"%s\"\n",temp_register,syscall.sys_call_name);
-        fprintf(fp, "PUSH R2\n");
+        fprintf(fp, "PUSH R%d\n",temp_register);
 
         //push argument 1
         fprintf(fp, "MOV R%d, %d\n",temp_register,syscall.arg1);
-        fprintf(fp, "PUSH R2\n");
+        fprintf(fp, "PUSH R%d\n",temp_register);
 
         //push argument 2
         fprintf(fp, "PUSH R%d\n",syscall.arg2);
