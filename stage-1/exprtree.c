@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<string.h>
+#include<stdlib.h>
 #include "exprtree.h"
 #define PUSH 1
 #define POP 2
@@ -83,10 +84,14 @@ void print_tree(FILE *fp, struct tnode *t,int type){
 
 }
 
-void codeGen(struct tnode *t,FILE* fp){
+reg_index codeGen(struct tnode *t,FILE* fp){
 	write_header(fp);
-	codeGenTree(t,fp);
+	int x = codeGenTree(t,fp);
+	system_call(fp,5,x,0,0);
+	
 }
+
+
 
 void write_header(FILE *fp){
  fprintf(fp, " %d\n %d\n %d\n %d\n %d\n %d\n %d\n %d\n ",0,2056,0,0,0,0,0,0);
@@ -155,3 +160,65 @@ void register_data_handle(int flag, FILE* opfile,int begin , int end ){
             
 
 }
+
+
+
+void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup ){
+        struct sys_call_abi syscall;
+
+
+        switch(syscallno){
+                case WRITE:     syscall.sys_call_number = 5;
+                                syscall.arg1 = -2;
+                                syscall.arg2 = arg2;
+                                syscall.interrupt_no = 7;
+                                strcpy(syscall.sys_call_name,"Write");
+                        //      syscall.arg3 = 
+                                break;
+                case READ:      syscall.sys_call_number = 7;
+                                syscall.arg1 = -1;
+                                syscall.arg2 = arg2;
+                                syscall.interrupt_no = 6;
+                                strcpy(syscall.sys_call_name, "Read");
+                        //      syscall.arg3 = 
+                                break;
+                case EXIT:      syscall.sys_call_number = 10;
+                                syscall.interrupt_no = 10;
+                                syscall.arg1 = 0;
+                                syscall.arg2 = 0;
+                                strcpy(syscall.sys_call_name, "Exit");
+                                break;
+        }
+
+
+        if(reg_backup){
+
+                register_data_handle(PUSH,fp,0,19);
+
+        }
+	
+	int temp_register = (syscall.arg2+1)%19;
+
+        //push system call name
+        fprintf(fp, "MOV R%d, \"%s\"\n",temp_register,syscall.sys_call_name);
+        fprintf(fp, "PUSH R2\n");
+
+        //push argument 1
+        fprintf(fp, "MOV R%d, %d\n",temp_register,syscall.arg1);
+        fprintf(fp, "PUSH R2\n");
+
+        //push argument 2
+        fprintf(fp, "PUSH R%d\n",syscall.arg2);
+
+        //push argument 3 (empty value)
+        fprintf(fp, "PUSH R0\n");
+
+        //push empty storage value
+        fprintf(fp, "PUSH R0\n");
+
+        //transfer control to library
+        fprintf(fp, "CALL 0\n");
+
+
+}
+
