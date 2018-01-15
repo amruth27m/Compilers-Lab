@@ -7,6 +7,8 @@
 
 reg_index register_count = 0;
 
+
+
 reg_index getReg(){
 	return ++register_count;
 }
@@ -84,10 +86,10 @@ void print_tree(FILE *fp, struct tnode *t,int type){
 
 }
 
+*/
 reg_index codeGen(struct tnode *t,FILE* fp){
 	write_header(fp);
 	int x = codeGenTree(t,fp);
-	system_call(fp,5,x,0,0);
 	system_call(fp,10,0,0,0);
 	
 }
@@ -96,48 +98,159 @@ reg_index codeGen(struct tnode *t,FILE* fp){
 
 void write_header(FILE *fp){
  fprintf(fp, " %d\n %d\n %d\n %d\n %d\n %d\n %d\n %d\n ",0,2056,0,0,0,0,0,0);
+ fprintf(fp, "MOV SP, 4122\n");
 }
 
 reg_index codeGenTree(struct tnode *t, FILE* fp){
-	if(t->op == NULL){
-		int temp = getReg();
-		fprintf(fp, "MOV R%d, %d\n",temp,t->val);
-		return temp;
+
+	if(t == NULL){
+		return -1;
 	}
-	else {
-		char operator[10];
-		switch(*(t->op)){
-			case '+':
-				strcpy(operator,"ADD");
-				break;
-			case '-':
-				strcpy(operator,"SUB");
-				break;
-			case '*':
-				strcpy(operator,"MUL");
-				break;
-			case '/':
-				strcpy(operator,"DIV");
-				break;
-
-		
-		}
-
-		int p = codeGenTree(t->left,fp);
-		int q = codeGenTree(t->right,fp);
-		if(p<q){
-			fprintf(fp, "%s R%d, R%d\n",operator,p,q);
-			freeReg();
+	int p,loc,q;
+	switch(t->type){
+		case 0:
+			p = getReg();
+			fprintf(fp,"MOV R%d, %d\n",p,t->val);
 			return p;
-		}
-		else {
-			fprintf(fp, "%s R%d, R%d\n",operator,q,p);
-			freeReg();
-			return q;
-		}
+		case 1: 
+			 p = getReg();
+			 loc = 4096 + (int)(*(t->varname)) - 'a';
+			fprintf(fp, "MOV R%d, [%d]\n",p,loc);
+			return p;
+		case 2:	
+			switch(t->nodetype){
+				case '+':	p = codeGenTree(t->left,fp);
+						q = codeGenTree(t->right,fp);
+						if(p<q){
+							fprintf(fp,"ADD R%d, R%d\n",p,q);
+							freeReg();
+							return p;
+						}
+						else{
+							fprintf(fp,"ADD R%d, R%d\n",q,p);
+							freeReg();
+							return q;
+						}
+						break;
+				case '-':	p = codeGenTree(t->left,fp);
+						q = codeGenTree(t->right,fp);
+						if(p<q){
+							fprintf(fp,"SUB R%d, R%d\n",p,q);
+							freeReg();
+							return p;
+						}
+						else{
+							fprintf(fp,"SUB R%d, R%d\n",q,p);
+							freeReg();
+							return q;
+						}
+						break;
+				case '*':	p = codeGenTree(t->left,fp);
+						q = codeGenTree(t->right,fp);
+						if(p<q){
+							fprintf(fp,"MUL R%d, R%d\n",p,q);
+							freeReg();
+							return p;
+						}
+						else{
+							fprintf(fp,"MUL R%d, R%d\n",q,p);
+							freeReg();
+							return q;
+						}
+						break;
+				
+				 case '/':	p = codeGenTree(t->left,fp);
+						q = codeGenTree(t->right,fp);
+						if(p<q){
+							fprintf(fp,"DIV R%d, R%d\n",p,q);
+							freeReg();
+							return p;
+						}
+						else{
+							fprintf(fp,"DIV R%d, R%d\n",q,p);
+							freeReg();
+							return q;
+						}
+						break;
+				
+
+				case '=' :
+						p = codeGenTree(t->right,fp);
+			 			loc = 4096 + (int)(*(t->left->varname)) - 'a';
+						fprintf(fp,"MOV [%d], R%d\n",loc,p);
+						break;
+				case 'r' :	
+			 			loc = 4096 + (int)(*(t->left->varname)) - 'a';
+						p = getReg();
+						fprintf(fp,"MOV R%d, %d\n",p,loc);
+						system_call(fp,7,p,0,1);
+						freeReg();
+						register_data_handle(POP,fp,0,19);
+						break;
+
+				case 'w' :	p = codeGenTree(t->left,fp);
+						system_call(fp,5,p,0,0);
+						break;
+
+			}
 		
+		case 3 : p = codeGenTree(t->left,fp);
+			 q = codeGenTree(t->right,fp);
+			 break;
 	}
+
 }
+
+int evalarray[26];
+
+
+int evalTree(struct tnode *t, FILE* fp){
+
+	if(t == NULL){
+		return 0;
+	}
+	int p,loc,q;
+	switch(t->type){
+		case 0:
+			return t->val;
+		case 1: 
+			return evalarray[*(t->varname) - 'a'];
+		case 2:	
+			switch(t->nodetype){
+				case '+':	
+						return evalTree(t->left,fp) + evalTree(t->right,fp);
+					
+				case '-':
+						return evalTree(t->left,fp) - evalTree(t->right,fp);
+						
+				case '*':	
+						return evalTree(t->left,fp) * evalTree(t->right,fp);
+				
+				 case '/':	
+				 		return evalTree(t->left,fp) / evalTree(t->right,fp);
+				
+
+				case '=' :
+						p = evalTree(t->right,fp);
+						evalarray[*(t->left->varname) - 'a'] = p;
+						return 0;
+				case 'r' :	
+						scanf("%d",&evalarray[*(t->left->varname) - 'a']);
+						break;
+
+				case 'w' :	p = evalTree(t->left,fp);
+						printf("%d",p);
+						break;
+
+			}
+		
+		case 3 : p = evalTree(t->left,fp);
+			 q = evalTree(t->right,fp);
+			 return -1;
+	}
+
+}
+
 
 
 void register_data_handle(int flag, FILE* opfile,int begin , int end ){
@@ -169,14 +282,14 @@ void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup ){
 
 
         switch(syscallno){
-                case WRITE:     syscall.sys_call_number = 5;
+                case WRTE:     syscall.sys_call_number = 5;
                                 syscall.arg1 = -2;
                                 syscall.arg2 = arg2;
                                 syscall.interrupt_no = 7;
                                 strcpy(syscall.sys_call_name,"Write");
                         //      syscall.arg3 = 
                                 break;
-                case READ:      syscall.sys_call_number = 7;
+                case RED:      syscall.sys_call_number = 7;
                                 syscall.arg1 = -1;
                                 syscall.arg2 = arg2;
                                 syscall.interrupt_no = 6;
@@ -222,7 +335,6 @@ void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup ){
 
 
 }
-*/
 
 struct tnode* createTreeNode(int val, int type, char c, struct tnode *l, struct tnode *r){
 	

@@ -14,7 +14,7 @@ extern int ylineno;
 program: BEG '\n' slist END '\n'{    
 printf("Evaluation successfully completed");
 $$ = $3;
-print_exp_tree($$);
+evalTree($$,stdout);
 exit(1);
 }
 	| BEG END  {
@@ -50,6 +50,8 @@ void yyerror(char *s){
 	printf("%s %d", s,ylineno);
 }
 int main(void){
+	extern FILE* yyin;
+	yyin = fopen("ip","r");
 	yyparse();
 	return 0;
 }

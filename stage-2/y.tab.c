@@ -1240,7 +1240,7 @@ yyreduce:
     {    
 printf("Evaluation successfully completed");
 (yyval) = (yyvsp[-2]);
-print_exp_tree((yyval));
+evalTree((yyval),stdout);
 exit(1);
 }
 #line 1247 "y.tab.c" /* yacc.c:1646  */
@@ -1581,6 +1581,8 @@ void yyerror(char *s){
 	printf("%s %d", s,ylineno);
 }
 int main(void){
+	extern FILE* yyin;
+	yyin = fopen("ip","r");
 	yyparse();
 	return 0;
 }
