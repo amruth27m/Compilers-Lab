@@ -1,6 +1,5 @@
 #ifndef EXPTREE_H_
 #define EXPTREE_H_
-#define reg_index int
 #define WRTE 5
 #define RED 7
 #define EXIT 10
@@ -12,6 +11,10 @@ typedef struct tnode{
 	int nodetype;
 	struct tnode *left, *right;
 }tnode;
+
+
+typedef int reg_index;
+
 
 struct sys_call_abi{
         int sys_call_number,arg1,arg2,arg3,interrupt_no;
