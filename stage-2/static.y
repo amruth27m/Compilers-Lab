@@ -40,6 +40,7 @@ E: 	  f ' ' PLUS ' ' E  {$$ = createTreeNode(0,2,'+',$1,$5);}
 	| f ' ' DIV ' ' E  {$$ = createTreeNode(0,2,'/',$1,$5);}
 	| f ' ' MUL ' ' E  {$$ = createTreeNode(0,2,'*',$1,$5);}
 	| f { $$ = $1;}
+	| '(' f ')'	{ $$ = $2;}
 	;
 f:	ID {$$ = $1;}
 	| CONSTANT {$$ = $1;}
