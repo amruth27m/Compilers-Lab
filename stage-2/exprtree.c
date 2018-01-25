@@ -282,21 +282,24 @@ void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup ){
 
 
         switch(syscallno){
-                case WRTE:     syscall.sys_call_number = 5;
+                case WRITE_SYSCALL: 
+				syscall.sys_call_number = 5;
                                 syscall.arg1 = -2;
                                 syscall.arg2 = arg2;
                                 syscall.interrupt_no = 7;
                                 strcpy(syscall.sys_call_name,"Write");
                         //      syscall.arg3 = 
                                 break;
-                case RED:      syscall.sys_call_number = 7;
+                case READ_SYSCALL: 
+				syscall.sys_call_number = 7;
                                 syscall.arg1 = -1;
                                 syscall.arg2 = arg2;
                                 syscall.interrupt_no = 6;
                                 strcpy(syscall.sys_call_name, "Read");
                         //      syscall.arg3 = 
                                 break;
-                case EXIT:      syscall.sys_call_number = 10;
+                case EXIT_SYSCALL:      
+				syscall.sys_call_number = 10;
                                 syscall.interrupt_no = 10;
                                 syscall.arg1 = 0;
                                 syscall.arg2 = 0;

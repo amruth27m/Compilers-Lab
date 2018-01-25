@@ -1,8 +1,8 @@
 #ifndef EXPTREE_H_
 #define EXPTREE_H_
-#define WRTE 5
-#define RED 7
-#define EXIT 10
+#define WRITE_SYSCALL 5
+#define READ_SYSCALL 7
+#define EXIT_SYSCALL 10
 
 typedef struct tnode{
 	int val;
