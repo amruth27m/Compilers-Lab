@@ -90,7 +90,7 @@ void print_tree(FILE *fp, struct tnode *t,int type){
 reg_index codeGen(struct tnode *t,FILE* fp){
 	write_header(fp);
 	int x = codeGenTree(t,fp);
-	system_call(fp,10,0,0,0);
+	system_call(fp,10,0,0);
 	
 }
 
@@ -183,13 +183,13 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			 			loc = 4096 + (int)(*(t->left->varname)) - 'a';
 						p = getReg();
 						fprintf(fp,"MOV R%d, %d\n",p,loc);
-						system_call(fp,7,p,0,1);
+						system_call(fp,7,p,0);
 						freeReg();
 						register_data_handle(POP,fp,0,19);
 						break;
 
 				case 'w' :	p = codeGenTree(t->left,fp);
-						system_call(fp,5,p,0,0);
+						system_call(fp,5,p,0);
 						break;
 
 			}
@@ -277,7 +277,7 @@ void register_data_handle(int flag, FILE* opfile,int begin , int end ){
 
 
 
-void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup ){
+void system_call(FILE *fp, int syscallno,int arg2,int opreg){
         struct sys_call_abi syscall;
 
 
@@ -307,13 +307,6 @@ void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup ){
                                 break;
         }
 
-
-        if(reg_backup){
-
-                register_data_handle(PUSH,fp,0,19);
-
-        }
-	
 	int temp_register = (syscall.arg2+1)%19;
 
         //push system call name

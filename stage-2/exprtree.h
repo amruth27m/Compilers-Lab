@@ -31,7 +31,7 @@ void print_tree(FILE *fp, struct tnode *t,int type);
 void write_header(FILE* fp);
 reg_index codeGenTree(struct tnode *t, FILE* fp);
 void register_data_handle(int flag, FILE* opfile,int begin , int end );
-void system_call(FILE *fp, int syscallno,int arg2,int opreg,int reg_backup );
+void system_call(FILE *fp, int syscallno,int arg2,int opreg);
 
 
 #endif
