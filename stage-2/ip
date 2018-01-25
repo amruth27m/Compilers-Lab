@@ -1,5 +1,5 @@
 begin
 read (a);
-b = (4);
+b = (a + 4);
 write (b);
 end;
