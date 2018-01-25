@@ -14,6 +14,7 @@ typedef struct tnode{
 
 
 typedef int reg_index;
+typedef int label_index;
 
 
 struct sys_call_abi{

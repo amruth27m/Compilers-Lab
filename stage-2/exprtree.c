@@ -5,17 +5,22 @@
 #define PUSH 1
 #define POP 2
 
-reg_index register_count = 0;
+reg_index _register_count = 0;
+label_index _label_count = 0;
+int _evalarray[26];
 
 
+label_index getLabel(){
+	return _label_count++;
+}
 
 reg_index getReg(){
-	return ++register_count;
+	return _register_count++;
 }
 
 void freeReg(){
-	if(register_count>0){
-		register_count--;
+	if(_register_count>0){
+		_register_count--;
 	}
 }
 
@@ -201,7 +206,6 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 
 }
 
-int evalarray[26];
 
 
 int evalTree(struct tnode *t, FILE* fp){
@@ -214,7 +218,7 @@ int evalTree(struct tnode *t, FILE* fp){
 		case 0:
 			return t->val;
 		case 1: 
-			return evalarray[*(t->varname) - 'a'];
+			return _evalarray[*(t->varname) - 'a'];
 		case 2:	
 			switch(t->nodetype){
 				case '+':	
@@ -232,10 +236,10 @@ int evalTree(struct tnode *t, FILE* fp){
 
 				case '=' :
 						p = evalTree(t->right,fp);
-						evalarray[*(t->left->varname) - 'a'] = p;
+						_evalarray[*(t->left->varname) - 'a'] = p;
 						return 0;
 				case 'r' :	
-						scanf("%d",&evalarray[*(t->left->varname) - 'a']);
+						scanf("%d",&_evalarray[*(t->left->varname) - 'a']);
 						break;
 
 				case 'w' :	p = evalTree(t->left,fp);
