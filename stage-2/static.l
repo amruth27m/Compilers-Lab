@@ -22,7 +22,7 @@ int ylineno = 0;
 "=" { return *yytext;}
 "\n" { ylineno++; return *yytext;}
 ";" { return *yytext;}
-[ ()] {return *yytext;}
+[()] {return *yytext;}
 
 . { printf("unknown character");}
 %%

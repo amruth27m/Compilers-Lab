@@ -29,16 +29,16 @@ stmt: inputstmt {$$ = $1;}
 	| outputstmt {$$ = $1;} 
 	| assignstmt {$$ = $1;}
 	;
-inputstmt: READ ' ' '(' ID ')' {$$ = createTreeNode(0,2,'r',$4,NULL);}
+inputstmt: READ  '(' ID ')' {$$ = createTreeNode(0,2,'r',$3,NULL);}
 	;
-outputstmt: WRITE ' ''(' E ')' {$$ = createTreeNode(0,2,'w',$4,NULL);}
+outputstmt: WRITE '(' E ')' {$$ = createTreeNode(0,2,'w',$3,NULL);}
 	;
-assignstmt: ID ' ' '='  ' ' E  {$$ = createTreeNode(0,2,'=',$1,$5);}	
+assignstmt: ID  '='   E  {$$ = createTreeNode(0,2,'=',$1,$3);}	
 	;
-E: 	  f ' ' PLUS ' ' E  {$$ = createTreeNode(0,2,'+',$1,$5);}
-	| f ' ' MIN ' ' E  {$$ = createTreeNode(0,2,'-',$1,$5);}
-	| f ' ' DIV ' ' E  {$$ = createTreeNode(0,2,'/',$1,$5);}
-	| f ' ' MUL ' ' E  {$$ = createTreeNode(0,2,'*',$1,$5);}
+E: 	  f  PLUS  E  {$$ = createTreeNode(0,2,'+',$1,$3);}
+	| f  MIN  E  {$$ = createTreeNode(0,2,'-',$1,$3);}
+	| f  DIV  E  {$$ = createTreeNode(0,2,'/',$1,$3);}
+	| f  MUL  E  {$$ = createTreeNode(0,2,'*',$1,$3);}
 	| f { $$ = $1;}
 	| '(' E ')'	{ $$ = $2;}
 	;

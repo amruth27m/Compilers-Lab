@@ -1,5 +1,5 @@
 begin
-read (a);
-b = (a + 4);
-write (b);
+read(a);
+b=(a+4);
+write(b);
 end;
