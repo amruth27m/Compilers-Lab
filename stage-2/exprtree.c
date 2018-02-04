@@ -113,16 +113,18 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 	}
 	int p,loc,q;
 	switch(t->type){
-		case 0:
+		case 0: //constants
 			p = getReg();
 			fprintf(fp,"MOV R%d, %d\n",p,t->val);
 			return p;
 		case 1: 
+			//variables
 			 p = getReg();
-			 loc = 4096 + (int)(*(t->varname)) - 'a';
+			 loc = 4096 + (int)((t->varname)[0]) - 'a';
 			fprintf(fp, "MOV R%d, [%d]\n",p,loc);
 			return p;
 		case 2:	
+			//arithemetic expressions
 			switch(t->nodetype){
 				case '+':	p = codeGenTree(t->left,fp);
 						q = codeGenTree(t->right,fp);
@@ -184,8 +186,19 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			 			loc = 4096 + (int)(*(t->left->varname)) - 'a';
 						fprintf(fp,"MOV [%d], R%d\n",loc,p);
 						break;
+						}
+		
+		case 3 : //empty node
+			 p = codeGenTree(t->left,fp);
+			 q = codeGenTree(t->right,fp);
+			 break;
+		
+		case 5:
+			//read and write
+			switch(t->nodetype){
+			
 				case 'r' :	
-			 			loc = 4096 + (int)(*(t->left->varname)) - 'a';
+			 			loc = 4096 + (int)(((t->left->varname)[0])) - 'a';
 						p = getReg();
 						fprintf(fp,"MOV R%d, %d\n",p,loc);
 						system_call(fp,7,p,0);
@@ -197,11 +210,11 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 						system_call(fp,5,p,0);
 						break;
 
+
+			
 			}
-		
-		case 3 : p = codeGenTree(t->left,fp);
-			 q = codeGenTree(t->right,fp);
-			 break;
+			break;
+					
 	}
 
 }
@@ -238,19 +251,69 @@ int evalTree(struct tnode *t, FILE* fp){
 						p = evalTree(t->right,fp);
 						_evalarray[*(t->left->varname) - 'a'] = p;
 						return 0;
-				case 'r' :	
-						scanf("%d",&_evalarray[*(t->left->varname) - 'a']);
-						break;
-
-				case 'w' :	p = evalTree(t->left,fp);
-						printf("%d",p);
-						break;
-
-			}
 		
+			}
+
 		case 3 : p = evalTree(t->left,fp);
 			 q = evalTree(t->right,fp);
 			 return -1;
+		case 4: 
+			 p = evalTree(t->left,fp);
+			 q = evalTree(t->right,fp);
+			 switch(t->nodetype){
+				 case CLT:
+					 if(p<q)	return 1; else return 0;
+					 break;
+				 case CLTE: 	if(p<=q) return 1; else return 0;
+							break;
+				 case CGT:	if(p>q) return 1; else return 0;
+							break;
+				 case CGTE:	if(p>=q) return 1; else return 0;
+							break;
+				 case CEQ:	if(p==q) return 1;else return 0;
+							break;
+				 case CNEQ: 	if(p!=q) return 1; else return 0;
+							break;
+			 }
+			 break;
+
+		case 5:
+			 switch(t->nodetype){
+				 
+				 case 'r' :	
+						 scanf("%d",&_evalarray[*(t->left->varname) - 'a']);
+						 break;
+
+				 case 'w' :	p = evalTree(t->left,fp);
+						printf("%d",p);
+						break;
+
+
+			 }
+
+
+		case 6: switch(t->nodetype){
+				case 1:
+					p = evalTree(t->left,fp);
+					if(p!=0){
+						q = evalTree(t->middle,fp);
+						return 1;	
+					}
+					else{
+						q = evalTree(t->right,fp);
+						return 1;
+					}
+					break;
+
+				case 2:
+					p = evalTree(t->left,fp);
+					while(p!=0){
+						q = evalTree(t->right,fp);
+						p = evalTree(t->left,fp);
+					}
+
+			}
+			break;
 	}
 
 }
@@ -336,55 +399,84 @@ void system_call(FILE *fp, int syscallno,int arg2,int opreg){
 
 }
 
-struct tnode* createTreeNode(int val, int type, char c, struct tnode *l, struct tnode *r){
+struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tnode *l, struct tnode *r){
 	
 	struct tnode* temp = malloc(sizeof(struct tnode));
 
 	switch(type){
-		case 0: temp->val = val;
+		case 0: //constants 
+			temp->val = val;
 			temp->type = type;
-			temp->varname = temp->left = temp->right = NULL;
-			break;
-		case 1: temp->val = 0;
-			temp->type = type;
-			temp->varname = malloc(sizeof(char));
-			*(temp->varname) = c;
 			temp->left = temp->right = NULL;
 			break;
-		case 2: temp->val = 0;
+		case 1: //variables
+			temp->val = 0;
 			temp->type = type;
-			temp->varname = NULL;
-			switch(c){
-				case '+': temp->nodetype = '+';
-					  break;
-				case '-': temp->nodetype = '-';
-					  break;
-				case '/': temp->nodetype = '/';
-					  break;
-				case '*': temp->nodetype = '*';
-					  break;
-				case '=': temp->nodetype = '=';
-					  break;
-				case 'r': temp->nodetype = 'r';
-					  break;
-				case 'w': temp->nodetype = 'w';
-					  break;
+			temp->varname = malloc(sizeof(char)*20);
+			strcpy(temp->varname,c);
+			temp->left = temp->right = NULL;
+			break;
+		case 2: //arithemetic exp
+			if(l->type==4||r->type==4){
+				printf("type mismatch\n");
+				exit(-1);
 			}
+			temp->val = 0;
+			temp->type = type;
+			temp->nodetype = nodetype;
 			temp->left = l;
 			temp->right = r;
 			break;
-		case 3: temp->val = 0;
-			temp->type = 3;
+		case 3: //empty nodes
+			temp->val = 0;
+			temp->type = type;
 			temp->nodetype = 'b';
+			temp->left = l;
+			temp->right = r;
+			break;
+		case 4: //logical operators
+			temp->type = type;
+			temp->nodetype = nodetype;
 			temp->left = l;
 			temp->right = r;
 			break;
 			
 
+		case 5: //read and write
+			temp->type = type;
+			temp->nodetype = nodetype;
+			temp->left = l;
+			temp->right = r;
+			break;
 	}
 
 	return temp;
 }
+
+struct tnode* createConditionalNode(int condition,struct tnode* l,struct tnode*m,struct tnode*r){
+	struct tnode* temp = malloc(sizeof(struct tnode));
+	if(l->type!=4||m->type==4||r->type==4){
+		printf("type mismatch\n");
+		exit(-1);
+
+	}
+	temp->type = 6;
+	if(condition == CIF){
+		temp->left = l;
+		temp->middle = m;
+		temp->right = r;
+		temp->nodetype = 1;
+	}
+	else if(condition == CWHILE){
+		temp->left = l;
+		temp->right = r;
+		temp->nodetype = 2;
+	
+	}
+
+	return temp;
+}
+
 
 void print_exp_tree(struct tnode* t){
 	if(t == NULL){

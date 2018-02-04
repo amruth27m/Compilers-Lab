@@ -1,5 +1,10 @@
 begin
 read(a);
-b=(a+4);
-write(b);
+read(b);
+if(a==b)then
+write(1);
+else
+write(0);
+endif;
 end;
+

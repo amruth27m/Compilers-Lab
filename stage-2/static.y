@@ -6,9 +6,10 @@
 #include "exprtree.c"
 extern int ylineno;
 %}
-%token BEG END READ WRITE ID CONSTANT
+%token BEG END READ WRITE ID CONSTANT IF THEN ELSE ENDIF WHILE ENDWHILE DO
 %left PLUS MIN
 %left MUL DIV
+%nonassoc LT LTE GT GTE EQ NEQ
 %%
 
 program: BEG '\n' slist END '\n'{    
@@ -17,28 +18,40 @@ $$ = $3;
 evalTree($$,stdout);
 exit(1);
 }
-	| BEG END  {
+	| BEG '\n'  END  {
 printf("Evaluation successfully completed");
 exit(1);
 }
 ;
-slist: 	stmt ';' '\n' slist { $$ = createTreeNode(0,3,'n',$1,$4);}
+slist: 	stmt ';' '\n' slist { $$ = createTreeNode(0,3,NULL,NULL,$1,$4);}
 	| stmt ';' '\n' { $$ = $1;}
 	;
 stmt: inputstmt {$$ = $1;} 
 	| outputstmt {$$ = $1;} 
 	| assignstmt {$$ = $1;}
+	| ifstmt {$$ = $1;}
+	| whilestmt {$$ = $1;}
 	;
-inputstmt: READ  '(' ID ')' {$$ = createTreeNode(0,2,'r',$3,NULL);}
+inputstmt: READ  '(' ID ')' {$$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
 	;
-outputstmt: WRITE '(' E ')' {$$ = createTreeNode(0,2,'w',$3,NULL);}
+outputstmt: WRITE '(' E ')' {$$ = createTreeNode(0,5,NULL,'w',$3,NULL);}
 	;
-assignstmt: ID  '='   E  {$$ = createTreeNode(0,2,'=',$1,$3);}	
+assignstmt: ID  '='   E  {$$ = createTreeNode(0,2,NULL,'=',$1,$3);}	
 	;
-E: 	  f  PLUS  E  {$$ = createTreeNode(0,2,'+',$1,$3);}
-	| f  MIN  E  {$$ = createTreeNode(0,2,'-',$1,$3);}
-	| f  DIV  E  {$$ = createTreeNode(0,2,'/',$1,$3);}
-	| f  MUL  E  {$$ = createTreeNode(0,2,'*',$1,$3);}
+ifstmt: IF '(' E ')' THEN '\n' slist ELSE '\n' slist ENDIF {$$ = createConditionalNode(CIF,$3,$7,$10);}
+	;
+whilestmt: WHILE '(' E ')'  DO '\n' slist  ENDWHILE {$$ = createConditionalNode(CWHILE,$3,$7,NULL); }
+
+E: 	  f  PLUS  E  {$$ = createTreeNode(0,2,NULL,'+',$1,$3);}
+	| f  MIN  E  {$$ = createTreeNode(0,2,NULL,'-',$1,$3);}
+	| f  DIV  E  {$$ = createTreeNode(0,2,NULL,'/',$1,$3);}
+	| f  MUL  E  {$$ = createTreeNode(0,2,NULL,'*',$1,$3);}
+	| f  LT   E  {$$ = createTreeNode(0,4,NULL,CLT,$1,$3);}
+	| f  LTE  E  {$$ = createTreeNode(0,4,NULL,CLTE,$1,$3); }
+	| f  GT   E  {$$ = createTreeNode(0,4,NULL,CGT,$1,$3);}
+	| f  GTE  E  {$$ = createTreeNode(0,4,NULL,CGTE,$1,$3);}
+	| f  EQ   E  {$$ = createTreeNode(0,4,NULL,CEQ,$1,$3);}
+	| f  NEQ  E  {$$ = createTreeNode(0,4,NULL,CNEQ,$1,$3);}
 	| f { $$ = $1;}
 	| '(' E ')'	{ $$ = $2;}
 	;

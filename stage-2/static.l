@@ -13,12 +13,25 @@ int ylineno = 0;
 (end;) { return END;}
 (read) {  return READ;}
 (write) { return WRITE; }
-[a-z] { yylval = createTreeNode(0,1,*yytext,NULL,NULL); return ID;}
-[0-9]+ {  yylval = createTreeNode(atoi(yytext),0,NULL,NULL,NULL); return CONSTANT; }
+(if) { return IF;}
+(then) { return THEN;}
+(else) { return ELSE;}
+(endif) { return ENDIF;}
+(while) { return WHILE;}
+(do) 	{ return DO;}
+(endwhile) {return ENDWHILE;}
+[a-z] { char *s = malloc(sizeof(char)); strcpy(s,yytext); yylval = createTreeNode(0,1,s,0,NULL,NULL); return ID;}
+[0-9]+ {  yylval = createTreeNode(atoi(yytext),0,0,NULL,NULL,NULL); return CONSTANT; }
 "+" { return PLUS;}
 "-" { return MIN; } 
 "*" { return MUL;} 
-"/" { return DIV;} 
+"/" { return DIV;}
+"<" { return LT;}
+">" { return GT;}
+(<=) { return LTE;}
+(>=) { return GTE;}
+(!=) { return NEQ;}
+(==) {return EQ;}
 "=" { return *yytext;}
 "\n" { ylineno++; return *yytext;}
 ";" { return *yytext;}
