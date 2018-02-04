@@ -192,6 +192,47 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			 p = codeGenTree(t->left,fp);
 			 q = codeGenTree(t->right,fp);
 			 break;
+
+		case 4: //logical operators
+			p = codeGenTree(t->left,fp);
+			q = codeGenTree(t->right,fp);
+			int opreg,ipreg;
+			if(p<q){
+				opreg = p;
+				ipreg = q;
+			}
+			else{
+				opreg = q;
+				ipreg = p;
+			}
+
+			switch(t->nodetype){
+				case CLT:
+					fprint(fp,"LT R%d, R%d\n",opreg,ipreg);
+					break;
+				case CLTE:
+
+					fprint(fp,"LE R%d, R%d\n",opreg,ipreg);
+					break;
+				case CGT:
+
+					fprint(fp,"GT R%d, R%d\n",opreg,ipreg);
+					break;
+				case CGTE:
+
+					fprint(fp,"GE R%d, R%d\n",opreg,ipreg);
+					break;
+				case CEQ:
+
+					fprint(fp,"EQ R%d, R%d\n",opreg,ipreg);
+					break;
+				case CNEQ:
+
+					fprint(fp,"NE R%d, R%d\n",opreg,ipreg);
+					break;
+
+			}
+			return opreg;
 		
 		case 5:
 			//read and write
@@ -213,7 +254,26 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 
 			
 			}
-			break;
+			break; 
+		case 6:
+			switch(t->nodetype){
+				case 1:
+					p = codeGenTree(t->left,fp);
+					int afterElseLabel = getLabel();
+					int elseLabel = getLabel();
+					fprintf(fp,"JZ R%d, l%d\n",p,elseLabel);
+					q = codeGenTree(t->middle,fp);
+					fprintf(fp,"JMP l%d\n",afterElseLabel);
+					fprintf(fp,"l%d:\n",elseLabel);
+					q = codeGenTree(t->right,fp);
+					fprintf("l%d:\n",afterElseLabel);
+					break;
+				case 2:
+					p = codeGenTree(
+
+
+			}
+			
 					
 	}
 

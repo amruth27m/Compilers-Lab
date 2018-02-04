@@ -1,10 +1,9 @@
 begin
-a=4;
-while(a>0)do
-write(a);
-read(b);
-write(b);
-a=a-1;
+read(n);
+a=0;
+while(n>0)do
+a=a+n;
+n=n-1;
 endwhile;
+write(a);
 end;
-
