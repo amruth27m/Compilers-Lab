@@ -15,6 +15,7 @@ extern int ylineno;
 program: BEG '\n' slist END '\n'{    
 printf("Evaluation successfully completed");
 $$ = $3;
+FILE *fp = fopen("out","w");
 evalTree($$,stdout);
 exit(1);
 }

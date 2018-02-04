@@ -472,9 +472,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    15,    15,    21,    26,    27,    29,    30,    31,    32,
-      33,    35,    37,    39,    41,    43,    45,    46,    47,    48,
-      49,    50,    51,    52,    53,    54,    55,    56,    58,    59
+       0,    15,    15,    23,    28,    29,    31,    32,    33,    34,
+      35,    37,    39,    41,    43,    45,    47,    48,    49,    50,
+      51,    52,    53,    54,    55,    56,    57,    58,    60,    61
 };
 #endif
 
@@ -1290,179 +1290,181 @@ yyreduce:
     {    
 printf("Evaluation successfully completed");
 (yyval) = (yyvsp[-2]);
+FILE *fp = fopen("out","w");
+codeGen((yyval),fp);
 evalTree((yyval),stdout);
 exit(1);
 }
-#line 1297 "y.tab.c" /* yacc.c:1646  */
+#line 1299 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 21 "static.y" /* yacc.c:1646  */
+#line 23 "static.y" /* yacc.c:1646  */
     {
 printf("Evaluation successfully completed");
 exit(1);
 }
-#line 1306 "y.tab.c" /* yacc.c:1646  */
+#line 1308 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 26 "static.y" /* yacc.c:1646  */
+#line 28 "static.y" /* yacc.c:1646  */
     { (yyval) = createTreeNode(0,3,NULL,NULL,(yyvsp[-3]),(yyvsp[0]));}
-#line 1312 "y.tab.c" /* yacc.c:1646  */
+#line 1314 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 27 "static.y" /* yacc.c:1646  */
+#line 29 "static.y" /* yacc.c:1646  */
     { (yyval) = (yyvsp[-2]);}
-#line 1318 "y.tab.c" /* yacc.c:1646  */
+#line 1320 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 29 "static.y" /* yacc.c:1646  */
+#line 31 "static.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1324 "y.tab.c" /* yacc.c:1646  */
+#line 1326 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 30 "static.y" /* yacc.c:1646  */
+#line 32 "static.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1330 "y.tab.c" /* yacc.c:1646  */
+#line 1332 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 31 "static.y" /* yacc.c:1646  */
+#line 33 "static.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1336 "y.tab.c" /* yacc.c:1646  */
+#line 1338 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 32 "static.y" /* yacc.c:1646  */
+#line 34 "static.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1342 "y.tab.c" /* yacc.c:1646  */
+#line 1344 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 33 "static.y" /* yacc.c:1646  */
+#line 35 "static.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1348 "y.tab.c" /* yacc.c:1646  */
+#line 1350 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 35 "static.y" /* yacc.c:1646  */
+#line 37 "static.y" /* yacc.c:1646  */
     {(yyval) = createTreeNode(0,5,NULL,'r',(yyvsp[-1]),NULL);}
-#line 1354 "y.tab.c" /* yacc.c:1646  */
+#line 1356 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 37 "static.y" /* yacc.c:1646  */
+#line 39 "static.y" /* yacc.c:1646  */
     {(yyval) = createTreeNode(0,5,NULL,'w',(yyvsp[-1]),NULL);}
-#line 1360 "y.tab.c" /* yacc.c:1646  */
+#line 1362 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 39 "static.y" /* yacc.c:1646  */
+#line 41 "static.y" /* yacc.c:1646  */
     {(yyval) = createTreeNode(0,2,NULL,'=',(yyvsp[-2]),(yyvsp[0]));}
-#line 1366 "y.tab.c" /* yacc.c:1646  */
+#line 1368 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 41 "static.y" /* yacc.c:1646  */
+#line 43 "static.y" /* yacc.c:1646  */
     {(yyval) = createConditionalNode(CIF,(yyvsp[-8]),(yyvsp[-4]),(yyvsp[-1]));}
-#line 1372 "y.tab.c" /* yacc.c:1646  */
+#line 1374 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 43 "static.y" /* yacc.c:1646  */
+#line 45 "static.y" /* yacc.c:1646  */
     {(yyval) = createConditionalNode(CWHILE,(yyvsp[-5]),NULL,(yyvsp[-1])); }
-#line 1378 "y.tab.c" /* yacc.c:1646  */
+#line 1380 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 45 "static.y" /* yacc.c:1646  */
+#line 47 "static.y" /* yacc.c:1646  */
     {(yyval) = createTreeNode(0,2,NULL,'+',(yyvsp[-2]),(yyvsp[0]));}
-#line 1384 "y.tab.c" /* yacc.c:1646  */
+#line 1386 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 46 "static.y" /* yacc.c:1646  */
+#line 48 "static.y" /* yacc.c:1646  */
     {(yyval) = createTreeNode(0,2,NULL,'-',(yyvsp[-2]),(yyvsp[0]));}
-#line 1390 "y.tab.c" /* yacc.c:1646  */
+#line 1392 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 47 "static.y" /* yacc.c:1646  */
+#line 49 "static.y" /* yacc.c:1646  */
     {(yyval) = createTreeNode(0,2,NULL,'/',(yyvsp[-2]),(yyvsp[0]));}
-#line 1396 "y.tab.c" /* yacc.c:1646  */
+#line 1398 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 48 "static.y" /* yacc.c:1646  */
+#line 50 "static.y" /* yacc.c:1646  */
     {(yyval) = createTreeNode(0,2,NULL,'*',(yyvsp[-2]),(yyvsp[0]));}
-#line 1402 "y.tab.c" /* yacc.c:1646  */
+#line 1404 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 49 "static.y" /* yacc.c:1646  */
+#line 51 "static.y" /* yacc.c:1646  */
     {(yyval) = createTreeNode(0,4,NULL,CLT,(yyvsp[-2]),(yyvsp[0]));}
-#line 1408 "y.tab.c" /* yacc.c:1646  */
+#line 1410 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 50 "static.y" /* yacc.c:1646  */
+#line 52 "static.y" /* yacc.c:1646  */
     {(yyval) = createTreeNode(0,4,NULL,CLTE,(yyvsp[-2]),(yyvsp[0])); }
-#line 1414 "y.tab.c" /* yacc.c:1646  */
+#line 1416 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 51 "static.y" /* yacc.c:1646  */
+#line 53 "static.y" /* yacc.c:1646  */
     {(yyval) = createTreeNode(0,4,NULL,CGT,(yyvsp[-2]),(yyvsp[0]));}
-#line 1420 "y.tab.c" /* yacc.c:1646  */
+#line 1422 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 52 "static.y" /* yacc.c:1646  */
+#line 54 "static.y" /* yacc.c:1646  */
     {(yyval) = createTreeNode(0,4,NULL,CGTE,(yyvsp[-2]),(yyvsp[0]));}
-#line 1426 "y.tab.c" /* yacc.c:1646  */
+#line 1428 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 53 "static.y" /* yacc.c:1646  */
+#line 55 "static.y" /* yacc.c:1646  */
     {(yyval) = createTreeNode(0,4,NULL,CEQ,(yyvsp[-2]),(yyvsp[0]));}
-#line 1432 "y.tab.c" /* yacc.c:1646  */
+#line 1434 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 54 "static.y" /* yacc.c:1646  */
+#line 56 "static.y" /* yacc.c:1646  */
     {(yyval) = createTreeNode(0,4,NULL,CNEQ,(yyvsp[-2]),(yyvsp[0]));}
-#line 1438 "y.tab.c" /* yacc.c:1646  */
+#line 1440 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 55 "static.y" /* yacc.c:1646  */
+#line 57 "static.y" /* yacc.c:1646  */
     { (yyval) = (yyvsp[0]);}
-#line 1444 "y.tab.c" /* yacc.c:1646  */
+#line 1446 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 56 "static.y" /* yacc.c:1646  */
+#line 58 "static.y" /* yacc.c:1646  */
     { (yyval) = (yyvsp[-1]);}
-#line 1450 "y.tab.c" /* yacc.c:1646  */
+#line 1452 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 58 "static.y" /* yacc.c:1646  */
+#line 60 "static.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1456 "y.tab.c" /* yacc.c:1646  */
+#line 1458 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 59 "static.y" /* yacc.c:1646  */
+#line 61 "static.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1462 "y.tab.c" /* yacc.c:1646  */
+#line 1464 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1466 "y.tab.c" /* yacc.c:1646  */
+#line 1468 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1690,7 +1692,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 61 "static.y" /* yacc.c:1906  */
+#line 63 "static.y" /* yacc.c:1906  */
 
 
 void yyerror(char *s){

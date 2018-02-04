@@ -187,7 +187,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 						fprintf(fp,"MOV [%d], R%d\n",loc,p);
 						break;
 						}
-		
+			break;
 		case 3 : //empty node
 			 p = codeGenTree(t->left,fp);
 			 q = codeGenTree(t->right,fp);
@@ -208,31 +208,33 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 
 			switch(t->nodetype){
 				case CLT:
-					fprint(fp,"LT R%d, R%d\n",opreg,ipreg);
+					fprintf(fp,"LT R%d, R%d\n",opreg,ipreg);
 					break;
 				case CLTE:
 
-					fprint(fp,"LE R%d, R%d\n",opreg,ipreg);
+					fprintf(fp,"LE R%d, R%d\n",opreg,ipreg);
 					break;
 				case CGT:
 
-					fprint(fp,"GT R%d, R%d\n",opreg,ipreg);
+					fprintf(fp,"GT R%d, R%d\n",opreg,ipreg);
 					break;
 				case CGTE:
 
-					fprint(fp,"GE R%d, R%d\n",opreg,ipreg);
+					fprintf(fp,"GE R%d, R%d\n",opreg,ipreg);
 					break;
 				case CEQ:
 
-					fprint(fp,"EQ R%d, R%d\n",opreg,ipreg);
+					fprintf(fp,"EQ R%d, R%d\n",opreg,ipreg);
 					break;
 				case CNEQ:
 
-					fprint(fp,"NE R%d, R%d\n",opreg,ipreg);
+					fprintf(fp,"NE R%d, R%d\n",opreg,ipreg);
 					break;
 
 			}
+			freeReg();
 			return opreg;
+			break;
 		
 		case 5:
 			//read and write
@@ -261,16 +263,23 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 					p = codeGenTree(t->left,fp);
 					int afterElseLabel = getLabel();
 					int elseLabel = getLabel();
-					fprintf(fp,"JZ R%d, l%d\n",p,elseLabel);
+					fprintf(fp,"JZ R%d, L%d\n",p,elseLabel);
 					q = codeGenTree(t->middle,fp);
-					fprintf(fp,"JMP l%d\n",afterElseLabel);
-					fprintf(fp,"l%d:\n",elseLabel);
+					fprintf(fp,"JMP L%d\n",afterElseLabel);
+					fprintf(fp,"L%d:\n",elseLabel);
 					q = codeGenTree(t->right,fp);
-					fprintf("l%d:\n",afterElseLabel);
+					fprintf("L%d:\n",afterElseLabel);
 					break;
-				case 2:
-					p = codeGenTree(
-
+				case 2:;
+					int whileStartLabel = getLabel();
+					int whileEndLabel = getLabel();
+					fprintf(fp,"L%d:\n",whileStartLabel);
+					p = codeGenTree(t->left,fp);
+					fprintf(fp,"JZ R%d, L%d\n",p,whileEndLabel);
+					q = codeGenTree(t->right,fp);
+					fprintf(fp,"JMP L%d\n",whileStartLabel);
+					fprintf(fp,"L%d:\n",whileEndLabel);
+					break;
 
 			}
 			
