@@ -1373,7 +1373,7 @@ exit(1);
 
   case 15:
 #line 43 "static.y" /* yacc.c:1646  */
-    {(yyval) = createConditionalNode(CWHILE,(yyvsp[-5]),(yyvsp[-1]),NULL); }
+    {(yyval) = createConditionalNode(CWHILE,(yyvsp[-5]),NULL,(yyvsp[-1])); }
 #line 1378 "y.tab.c" /* yacc.c:1646  */
     break;
 

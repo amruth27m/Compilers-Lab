@@ -1,10 +1,10 @@
 begin
-read(a);
+a=4;
+while(a>0)do
+write(a);
 read(b);
-if(a==b)then
-write(1);
-else
-write(0);
-endif;
+write(b);
+a=a-1;
+endwhile;
 end;
 

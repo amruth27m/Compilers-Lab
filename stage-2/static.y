@@ -40,7 +40,7 @@ assignstmt: ID  '='   E  {$$ = createTreeNode(0,2,NULL,'=',$1,$3);}
 	;
 ifstmt: IF '(' E ')' THEN '\n' slist ELSE '\n' slist ENDIF {$$ = createConditionalNode(CIF,$3,$7,$10);}
 	;
-whilestmt: WHILE '(' E ')'  DO '\n' slist  ENDWHILE {$$ = createConditionalNode(CWHILE,$3,$7,NULL); }
+whilestmt: WHILE '(' E ')'  DO '\n' slist  ENDWHILE {$$ = createConditionalNode(CWHILE,$3,NULL,$7); }
 
 E: 	  f  PLUS  E  {$$ = createTreeNode(0,2,NULL,'+',$1,$3);}
 	| f  MIN  E  {$$ = createTreeNode(0,2,NULL,'-',$1,$3);}

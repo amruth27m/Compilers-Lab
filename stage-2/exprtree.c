@@ -455,13 +455,17 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 
 struct tnode* createConditionalNode(int condition,struct tnode* l,struct tnode*m,struct tnode*r){
 	struct tnode* temp = malloc(sizeof(struct tnode));
-	if(l->type!=4||m->type==4||r->type==4){
+	if(l->type!=4||r->type==4){
 		printf("type mismatch\n");
 		exit(-1);
 
 	}
 	temp->type = 6;
 	if(condition == CIF){
+		if(m->type==4){
+			printf("Type mismatch for if\n");
+			exit(-1);
+		}
 		temp->left = l;
 		temp->middle = m;
 		temp->right = r;
