@@ -1,11 +1,9 @@
 begin
 read(a);
-while(a>4)do
-if(a==6)then
-break;
-else
+read(b);
+if(a>0)then
 write(a);
-a=a-1;
+else
+write(b);
 endif;
-endwhile;
 end;

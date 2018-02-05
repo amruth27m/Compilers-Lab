@@ -81,6 +81,7 @@ int main(int argc, char* argv[])
 	yylex();
 	currLine=2048;
 	pass=2;
+	display();
 	fclose(ftemp);
 	fout = fopen(argv[2], "w");
 	fin = fopen("temp", "r");

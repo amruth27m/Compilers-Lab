@@ -269,14 +269,15 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			switch(t->nodetype){
 				case 1:
 					p = codeGenTree(t->left,fp);
-					int afterElseLabel = getLabel();
 					int elseLabel = getLabel();
 					fprintf(fp,"JZ R%d, L%d\n",p,elseLabel);
 					q = codeGenTree(t->middle,fp);
+
+					int afterElseLabel = getLabel();
 					fprintf(fp,"JMP L%d\n",afterElseLabel);
 					fprintf(fp,"L%d:\n",elseLabel);
 					q = codeGenTree(t->right,fp);
-					fprintf("L%d:\n",afterElseLabel);
+					fprintf(fp,"L%d:\n",afterElseLabel);
 					break;
 				case 2:;
 					int whileStartLabel = getLabel();
