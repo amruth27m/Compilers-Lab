@@ -1,6 +1,4 @@
-
 %option noyywrap
-
 %{
 	#include<stdio.h>
 	#include<stdlib.h>
@@ -13,54 +11,44 @@
 	int pass=1;
 	int currLine = 2048;
 %}
-
 %%
-
 (.)*:[\n] {
-			if(pass==1){
-				char t;
-				t = yytext[1];
-				insert(t-'0',currLine);
-			}
-			}
+	if(pass==1){
+		char t;
+		t = yytext[1];
+		insert(t-'0',currLine);
+	}
+}
 
 
-(J(.)*[\n]) {	//printf("In a Jump %d\n",pass);
+(J(.)*[\n]) {
 				
-				if(pass == 1){
-					fstrcpy(ftemp, yytext);
-				} else {
-					int i,j, labelNo;				
-					char tempS[50];
-					//saves string upto 'L' eg "JMP ", "JZ R4, "
-					for(i=0; i<yyleng && yytext[i]!='L' ; i++){
-						tempS[i] = yytext[i];
-					}
-					tempS[i]='\0';
-					labelNo = yytext[i+1] - '0';
-					fprintf(fout,"%s%d\n",tempS,search(labelNo));
-				}
-				incLine();
-			}
+	if(pass == 1){
+		fstrcpy(ftemp, yytext);
+	} else {
+		int i,j, labelNo;				
+		char tempS[50];
+		for(i=0; i<yyleng && yytext[i]!='L' ; i++){
+			tempS[i] = yytext[i];
+		}
+		tempS[i]='\0';
+		labelNo = yytext[i+1] - '0';
+			fprintf(fout,"%s%d\n",tempS,search(labelNo));
+		}
+		incLine();
+}
 
 
 .*[\n] {	
-			if(pass == 1){
-					fstrcpy(ftemp, yytext);
-				} else if(pass==2){
-					fstrcpy(fout, yytext);
-				}
-				incLine();
-		}
-
-
+	if(pass == 1){
+		fstrcpy(ftemp, yytext);
+	} else if(pass==2){
+		fstrcpy(fout, yytext);
+	}
+		incLine();
+}
 
 %%
-
-
-
-/* Auxiliary functions */
-
 
 
 void incLine(){
@@ -77,10 +65,9 @@ void fstrcpy(FILE *fp, char* s){
 	int i;
 	char ch;
 	for(i=0;i<strlen(s);i++){
-      ch = s[i];
-      putc(ch, fp);
-   }
-   
+      	ch = s[i];
+       	putc(ch, fp);
+     	}
 }
 
 int main(int argc, char* argv[])
@@ -89,7 +76,6 @@ int main(int argc, char* argv[])
 		ftemp =fopen("temp", "w");
 		yyin = fopen(argv[1], "r");
 	} else {
-		printf("\nExpected filename for input and output\n ./a.out <inputfile> <outputfile>\n\n");
 		return 0;
 	}
 	yylex();
@@ -99,13 +85,10 @@ int main(int argc, char* argv[])
 	fout = fopen(argv[2], "w");
 	fin = fopen("temp", "r");
 	yyin = fin;
-	
 	if (!yyin) {
-		printf("Error opening include file: %s\n", yytext);
 		return 1;
 		}
 	yylex();
-	printf("success\n");
 	return 1;
 }
 

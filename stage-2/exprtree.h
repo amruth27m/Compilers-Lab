@@ -11,6 +11,7 @@
 #define CNEQ 9006
 #define CIF 9007
 #define CWHILE 9008
+#define CIF_ELSE 9009
 typedef struct tnode{
 	int val;
 	int type;
@@ -23,6 +24,9 @@ typedef struct tnode{
 typedef int reg_index;
 typedef int label_index;
 
+int break_stack[100];
+int continue_stack[100];
+int break_top,continue_top;
 
 struct sys_call_abi{
         int sys_call_number,arg1,arg2,arg3,interrupt_no;

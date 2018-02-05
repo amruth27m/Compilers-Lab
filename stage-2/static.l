@@ -19,6 +19,8 @@ int ylineno = 0;
 (endif) { return ENDIF;}
 (while) { return WHILE;}
 (do) 	{ return DO;}
+(break) { return BREAK;}
+(continue) { return CONTINUE;}
 (endwhile) {return ENDWHILE;}
 [a-z] { char *s = malloc(sizeof(char)); strcpy(s,yytext); yylval = createTreeNode(0,1,s,0,NULL,NULL); return ID;}
 [0-9]+ {  yylval = createTreeNode(atoi(yytext),0,0,NULL,NULL,NULL); return CONSTANT; }

@@ -58,16 +58,18 @@ extern int yydebug;
     WHILE = 268,
     ENDWHILE = 269,
     DO = 270,
-    PLUS = 271,
-    MIN = 272,
-    MUL = 273,
-    DIV = 274,
-    LT = 275,
-    LTE = 276,
-    GT = 277,
-    GTE = 278,
-    EQ = 279,
-    NEQ = 280
+    CONTINUE = 271,
+    BREAK = 272,
+    PLUS = 273,
+    MIN = 274,
+    MUL = 275,
+    DIV = 276,
+    LT = 277,
+    LTE = 278,
+    GT = 279,
+    GTE = 280,
+    EQ = 281,
+    NEQ = 282
   };
 #endif
 /* Tokens.  */
@@ -84,16 +86,18 @@ extern int yydebug;
 #define WHILE 268
 #define ENDWHILE 269
 #define DO 270
-#define PLUS 271
-#define MIN 272
-#define MUL 273
-#define DIV 274
-#define LT 275
-#define LTE 276
-#define GT 277
-#define GTE 278
-#define EQ 279
-#define NEQ 280
+#define CONTINUE 271
+#define BREAK 272
+#define PLUS 273
+#define MIN 274
+#define MUL 275
+#define DIV 276
+#define LT 277
+#define LTE 278
+#define GT 279
+#define GTE 280
+#define EQ 281
+#define NEQ 282
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED

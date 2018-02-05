@@ -106,6 +106,15 @@ void write_header(FILE *fp){
  fprintf(fp, "MOV SP, 4122\n");
 }
 
+int curBreak(){
+	continue_top--;
+	return break_stack[break_top--];
+}
+
+int curCon(){
+	return continue_stack[continue_top];
+}
+
 reg_index codeGenTree(struct tnode *t, FILE* fp){
 
 	if(t == NULL){
@@ -246,7 +255,6 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 						fprintf(fp,"MOV R%d, %d\n",p,loc);
 						system_call(fp,7,p,0);
 						freeReg();
-						register_data_handle(POP,fp,0,19);
 						break;
 
 				case 'w' :	p = codeGenTree(t->left,fp);
@@ -273,16 +281,44 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 				case 2:;
 					int whileStartLabel = getLabel();
 					int whileEndLabel = getLabel();
+					
+					break_stack[++break_top] = whileEndLabel;
+					continue_stack[++continue_top] = whileStartLabel;
+
 					fprintf(fp,"L%d:\n",whileStartLabel);
 					p = codeGenTree(t->left,fp);
 					fprintf(fp,"JZ R%d, L%d\n",p,whileEndLabel);
 					q = codeGenTree(t->right,fp);
 					fprintf(fp,"JMP L%d\n",whileStartLabel);
 					fprintf(fp,"L%d:\n",whileEndLabel);
+					
+					break_top--;
+					continue_top--;
+
+					break;
+				case 3:
+					p = codeGenTree(t->left,fp);
+					int afterThenLabel = getLabel();
+					fprintf(fp,"JZ R%d, L%d\n",p,afterThenLabel);
+					q = codeGenTree(t->right,fp);
+					fprintf(fp,"L%d:\n",afterThenLabel);
 					break;
 
 			}
-			
+			break;
+		case 7:
+			switch(t->nodetype){
+				case 0:
+					//break;
+					fprintf(fp,"JMP L%d\n",curBreak());
+					break;
+				case 1:
+					fprintf(fp,"JMP L%d\n",curCon());
+					break;
+					//continue;
+			}
+			break;
+
 					
 	}
 
@@ -468,6 +504,20 @@ void system_call(FILE *fp, int syscallno,int arg2,int opreg){
 
 }
 
+struct tnode* createBreakNode(int type){
+	struct tnode *temp = malloc(sizeof(struct tnode));
+	temp->type = 7;
+	switch(type){
+		case 0:
+			temp->nodetype = 0;
+			break;
+		case 1:
+			temp->nodetype = 1;
+			break;
+	}
+	return temp;
+}
+
 struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tnode *l, struct tnode *r){
 	
 	struct tnode* temp = malloc(sizeof(struct tnode));
@@ -524,27 +574,45 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 
 struct tnode* createConditionalNode(int condition,struct tnode* l,struct tnode*m,struct tnode*r){
 	struct tnode* temp = malloc(sizeof(struct tnode));
-	if(l->type!=4||r->type==4){
+	if(l->type!=4){
 		printf("type mismatch\n");
 		exit(-1);
 
 	}
 	temp->type = 6;
-	if(condition == CIF){
-		if(m->type==4){
-			printf("Type mismatch for if\n");
-			exit(-1);
-		}
-		temp->left = l;
-		temp->middle = m;
-		temp->right = r;
-		temp->nodetype = 1;
-	}
-	else if(condition == CWHILE){
-		temp->left = l;
-		temp->right = r;
-		temp->nodetype = 2;
-	
+	switch(condition){
+		case CIF:
+
+			if(m->type==4||r->type==4){
+				printf("Type mismatch for if\n");
+				exit(-1);
+			}
+			temp->left = l;
+			temp->middle = m;
+			temp->right = r;
+			temp->nodetype = 1;
+			break;
+
+		case CWHILE:
+			if(r->type==4){
+				printf("Type mismatch for if\n");
+				exit(-1);
+			}
+			temp->left = l;
+			temp->right = r;
+			temp->nodetype = 2;
+			break;
+
+		case CIF_ELSE:
+			if(m->type==4){
+				printf("Type mismatch for if\n");
+				exit(-1);
+			}
+			temp->left = l;
+			temp->right = m;
+			temp->nodetype = 3;
+			break;
+
 	}
 
 	return temp;
