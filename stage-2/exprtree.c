@@ -9,6 +9,19 @@ reg_index _register_count = 0;
 label_index _label_count = 0;
 int _evalarray[26];
 
+struct Gsymbol *gsymbol_begin = NULL;
+struct Gsymbol *gsymbol_cur = NULL;
+binding_addr = 4096;
+
+
+void inc_binding_addr(int count){
+	binding_addr += count;
+}
+
+int get_binding_addr(){
+	return binding_addr;
+}
+
 
 //function to get the next label
 label_index getLabel(){
@@ -27,6 +40,8 @@ void freeReg(){
 	}
 }
 
+
+
 //function to get the label of current break position
 int current_break(){
 	continue_top--;
@@ -38,10 +53,75 @@ int current_continue(){
 	return continue_stack[continue_top];
 }
 
+struct Gsymbol *lookup(char *name){
+	struct Gsymbol *iter = gsymbol_begin;
+	while(iter!=NULL){
+		if(strcmp((iter->varname),name) == 0)
+			return iter;
+		iter = iter->next;
+	}
+	return iter;
+}
+void createDeclarations(int type,struct varList *list){
+	while(list!=NULL){
+		if(lookup(list->name)!=NULL){
+			list = list->next;
+			continue;
+		}
+		else{
+			initVariable(list->name,type,1);
+			list = list->next;
+		}
+	}	
+}
+
+void printSymbolTable(){
+	struct Gsymbol *iter = gsymbol_begin;
+	printf("\n");
+	while(iter!=NULL){
+		printf("%s %d %d %d\n",iter->varname,iter->type,iter->size,iter->binding);
+		iter = iter->next;
+	}
+}
+
+void initVariable(char *name, int type,int size){
+
+	struct Gsymbol *temp = malloc(sizeof(struct Gsymbol));
+	(temp->varname) = malloc(sizeof(char)*strlen(name));
+	strcpy((temp->varname),name);
+	temp->type = type;
+	temp->size = size;
+	temp->binding = get_binding_addr();
+	inc_binding_addr(size);
+
+	if(gsymbol_cur == NULL){
+		gsymbol_begin = gsymbol_cur = temp;
+	}
+	else{
+		(gsymbol_cur->next) = temp;
+		gsymbol_cur = temp;
+	}
+}
+
+struct varList *createVarNode(struct tnode *temp){
+	struct varList *dummy = malloc(sizeof(struct varList));
+	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
+	strcpy((dummy->name),temp->varname);
+	dummy->next = NULL;
+	return dummy;
+}
+
+struct varList *linkVarNode(struct tnode *id, struct varList *rest){
+	struct varList *dummy = malloc(sizeof(struct varList));
+	dummy->name = malloc(sizeof(char)*strlen(id->varname));
+	strcpy((dummy->name),id->varname);
+	dummy->next = rest;
+	return dummy;
+}
 
 void  codeGen(struct tnode *t,FILE* fp){
 	write_header(fp);
-	int x = codeGenTree(t,fp);
+	codeGenTree(t,fp);
 	system_call(fp,10,0,0);
 	
 }
@@ -58,23 +138,29 @@ void write_header(FILE *fp){
 
 
 reg_index codeGenTree(struct tnode *t, FILE* fp){
-
+	
+	//if the link is null
 	if(t == NULL){
 		return -1;
 	}
+
+
 	int p,loc,q;
+	
 	switch(t->type){
-		case 0: //constants
+		case NUMERIC_CONSTANT: //constants
 			p = getReg();
 			fprintf(fp,"MOV R%d, %d\n",p,t->val);
 			return p;
-		case 1: 
+
+		case VARIABLE: 
 			//variables
-			 p = getReg();
-			 loc = 4096 + (int)((t->varname)[0]) - 'a';
+			p = getReg();
+			loc = 4096 + (int)((t->varname)[0]) - 'a';
 			fprintf(fp, "MOV R%d, [%d]\n",p,loc);
 			return p;
-		case 2:	
+
+		case ARITHEMETIC_EXP:	
 			//arithemetic expressions
 			switch(t->nodetype){
 				case '+':	p = codeGenTree(t->left,fp);
@@ -90,6 +176,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 							return q;
 						}
 						break;
+
 				case '-':	p = codeGenTree(t->left,fp);
 						q = codeGenTree(t->right,fp);
 						if(p<q){
@@ -103,6 +190,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 							return q;
 						}
 						break;
+
 				case '*':	p = codeGenTree(t->left,fp);
 						q = codeGenTree(t->right,fp);
 						if(p<q){
@@ -137,14 +225,15 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			 			loc = 4096 + (int)(*(t->left->varname)) - 'a';
 						fprintf(fp,"MOV [%d], R%d\n",loc,p);
 						break;
-						}
+			}
 			break;
-		case 3 : //empty node
+
+		case EMPTY_NODE: //empty node
 			 p = codeGenTree(t->left,fp);
 			 q = codeGenTree(t->right,fp);
 			 break;
 
-		case 4: //logical operators
+		case LOGICAL_EXP: //logical operators
 			p = codeGenTree(t->left,fp);
 			q = codeGenTree(t->right,fp);
 			int opreg,ipreg;
@@ -158,27 +247,28 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			}
 
 			switch(t->nodetype){
+			
 				case CLT:
 					fprintf(fp,"LT R%d, R%d\n",opreg,ipreg);
 					break;
+				
 				case CLTE:
-
 					fprintf(fp,"LE R%d, R%d\n",opreg,ipreg);
 					break;
-				case CGT:
 
+				case CGT:
 					fprintf(fp,"GT R%d, R%d\n",opreg,ipreg);
 					break;
-				case CGTE:
 
+				case CGTE:
 					fprintf(fp,"GE R%d, R%d\n",opreg,ipreg);
 					break;
-				case CEQ:
 
+				case CEQ:
 					fprintf(fp,"EQ R%d, R%d\n",opreg,ipreg);
 					break;
-				case CNEQ:
 
+				case CNEQ:
 					fprintf(fp,"NE R%d, R%d\n",opreg,ipreg);
 					break;
 
@@ -187,7 +277,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			return opreg;
 			break;
 		
-		case 5:
+		case READ_WRITE:
 			//read and write
 			switch(t->nodetype){
 			
@@ -207,7 +297,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			
 			}
 			break; 
-		case 6:
+		case CONDITIONAL_EXP:
 			switch(t->nodetype){
 				case 1:
 					p = codeGenTree(t->left,fp);
@@ -249,7 +339,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 
 			}
 			break;
-		case 7:
+		case BREAK_EXP:
 			switch(t->nodetype){
 				case 0:
 					//break;
@@ -449,12 +539,12 @@ void system_call(FILE *fp, int syscallno,int arg2,int opreg){
 
 struct tnode* createBreakNode(int type){
 	struct tnode *temp = malloc(sizeof(struct tnode));
-	temp->type = 7;
+	temp->type = BREAK_EXP;
 	switch(type){
-		case 0:
+		case BREAK_STATEMENT:
 			temp->nodetype = 0;
 			break;
-		case 1:
+		case CONTINUE_STATEMENT:
 			temp->nodetype = 1;
 			break;
 	}
@@ -466,20 +556,20 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 	struct tnode* temp = malloc(sizeof(struct tnode));
 
 	switch(type){
-		case 0: //constants 
+		case NUMERIC_CONSTANT: //constants 
 			temp->val = val;
 			temp->type = type;
 			temp->left = temp->right = NULL;
 			break;
-		case 1: //variables
+		case VARIABLE: //variables
 			temp->val = 0;
 			temp->type = type;
 			temp->varname = malloc(sizeof(char)*20);
 			strcpy(temp->varname,c);
 			temp->left = temp->right = NULL;
 			break;
-		case 2: //arithemetic exp
-			if(l->type==4||r->type==4){
+		case ARITHEMETIC_EXP: //arithemetic exp
+			if(l->type==LOGICAL_EXP||r->type==LOGICAL_EXP){
 				printf("type mismatch\n");
 				exit(-1);
 			}
@@ -489,14 +579,14 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 			temp->left = l;
 			temp->right = r;
 			break;
-		case 3: //empty nodes
+		case EMPTY_NODE: //empty nodes
 			temp->val = 0;
 			temp->type = type;
 			temp->nodetype = 'b';
 			temp->left = l;
 			temp->right = r;
 			break;
-		case 4: //logical operators
+		case LOGICAL_EXP:
 			temp->type = type;
 			temp->nodetype = nodetype;
 			temp->left = l;
@@ -504,7 +594,7 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 			break;
 			
 
-		case 5: //read and write
+		case READ_WRITE: //read and write
 			temp->type = type;
 			temp->nodetype = nodetype;
 			temp->left = l;
@@ -517,16 +607,17 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 
 struct tnode* createConditionalNode(int condition,struct tnode* l,struct tnode*m,struct tnode*r){
 	struct tnode* temp = malloc(sizeof(struct tnode));
-	if(l->type!=4){
+
+	if(l->type!=LOGICAL_EXP){
 		printf("type mismatch\n");
 		exit(-1);
-
 	}
-	temp->type = 6;
+
+	temp->type = CONDITIONAL_EXP;
+
 	switch(condition){
 		case CIF:
-
-			if(m->type==4||r->type==4){
+			if(m->type==LOGICAL_EXP||r->type==LOGICAL_EXP){
 				printf("Type mismatch for if\n");
 				exit(-1);
 			}
@@ -537,8 +628,8 @@ struct tnode* createConditionalNode(int condition,struct tnode* l,struct tnode*m
 			break;
 
 		case CWHILE:
-			if(r->type==4){
-				printf("Type mismatch for if\n");
+			if(r->type==LOGICAL_EXP){
+				printf("Type mismatch for while\n");
 				exit(-1);
 			}
 			temp->left = l;
@@ -547,8 +638,8 @@ struct tnode* createConditionalNode(int condition,struct tnode* l,struct tnode*m
 			break;
 
 		case CIF_ELSE:
-			if(m->type==4){
-				printf("Type mismatch for if\n");
+			if(m->type==LOGICAL_EXP){
+				printf("Type mismatch for if_else\n");
 				exit(-1);
 			}
 			temp->left = l;

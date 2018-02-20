@@ -1,4 +1,8 @@
 begin
+decl
+int c,d;
+str a,n,c;
+enddecl;
 read(a);
 read(b);
 if(a>0)then

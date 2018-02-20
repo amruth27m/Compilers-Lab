@@ -6,7 +6,7 @@
 #include "exprtree.c"
 extern int ylineno;
 %}
-%token BEG END READ WRITE ID CONSTANT IF THEN ELSE ENDIF WHILE ENDWHILE DO CONTINUE BREAK
+%token BEG END READ WRITE ID CONSTANT IF THEN ELSE ENDIF WHILE ENDWHILE DO CONTINUE BREAK DECL ENDDECL INT STR
 %left PLUS MIN
 %left MUL DIV
 %nonassoc LT LTE GT GTE EQ NEQ
@@ -17,6 +17,7 @@ printf("Evaluation successfully completed");
 $$ = $3;
 FILE *fp = fopen("out","w");
 codeGen($$,fp);
+printSymbolTable();
 exit(1);
 }
 	| BEG '\n'  END  {
@@ -36,6 +37,7 @@ stmt: inputstmt {$$ = $1;}
 	| whilestmt {$$ = $1;}
 	| breakstmt {$$ = $1;}
 	| continuestmt {$$ = $1;}
+	| Declarations {$$ = $1; }
 	;
 inputstmt: READ  '(' ID ')' {$$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
 	;
@@ -44,8 +46,8 @@ outputstmt: WRITE '(' E ')' {$$ = createTreeNode(0,5,NULL,'w',$3,NULL);}
 assignstmt: ID  '='   E  {$$ = createTreeNode(0,2,NULL,'=',$1,$3);}	
 	;
 
-breakstmt: BREAK {$$ = createBreakNode(0);}
-continuestmt: CONTINUE {$$ = createBreakNode(1);}
+breakstmt: BREAK {$$ = createBreakNode(BREAK_STATEMENT);}
+continuestmt: CONTINUE {$$ = createBreakNode(CONTINUE_STATEMENT);}
 
 ifstmt:   IF '(' E ')' THEN '\n' slist ENDIF {$$ = createConditionalNode(CIF_ELSE,$3,$7,NULL);}
 	| IF '(' E ')' THEN '\n' slist ELSE '\n' slist ENDIF {$$ = createConditionalNode(CIF,$3,$7,$10);}
@@ -65,6 +67,22 @@ E: 	  f  PLUS  E  {$$ = createTreeNode(0,2,NULL,'+',$1,$3);}
 	| f { $$ = $1;}
 	| '(' E ')'	{ $$ = $2;}
 	;
+Declarations: DECL '\n' Declist ENDDECL {$$ = $2; }
+	| DECL '\n' ENDDECL {$$ = $1;}
+
+Declist: Decl Declist {$$ = $1;} 
+	| Decl {$$ = $1;}
+
+Decl: Type ' ' Varlist ';' '\n' {createDeclarations($1,$3);}
+
+Type: 	INT {$$ = $1;}
+	| STR {$$ = $1;}
+
+Varlist: ID ',' Varlist {$$ = linkVarNode($1,$3);}
+	| ID {$$ = createVarNode($1);}
+
+
+
 f:	ID {$$ = $1;}
 	| CONSTANT {$$ = $1;}
 	;

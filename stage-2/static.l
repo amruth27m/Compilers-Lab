@@ -4,6 +4,7 @@
 #include "y.tab.h"
 int ylineno = 0;
 
+
 %}
 
 
@@ -22,6 +23,10 @@ int ylineno = 0;
 (break) { return BREAK;}
 (continue) { return CONTINUE;}
 (endwhile) {return ENDWHILE;}
+(decl) {return DECL;}
+(enddecl) {return ENDDECL;}
+(int) { yylval = 0; return INT;}
+(str) {yylval = 1; return STR;}
 [a-z] { char *s = malloc(sizeof(char)); strcpy(s,yytext); yylval = createTreeNode(0,1,s,0,NULL,NULL); return ID;}
 [0-9]+ {  yylval = createTreeNode(atoi(yytext),0,0,NULL,NULL,NULL); return CONSTANT; }
 "+" { return PLUS;}
@@ -37,7 +42,7 @@ int ylineno = 0;
 "=" { return *yytext;}
 "\n" { ylineno++; return *yytext;}
 ";" { return *yytext;}
-[()] {return *yytext;}
+[(), ] {return *yytext;}
 
 . { printf("unknown character");}
 %%
