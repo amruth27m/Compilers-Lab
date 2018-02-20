@@ -1,7 +1,7 @@
 begin
 decl
-int c,d;
-str a,n,c;
+int cat,dog;
+str aaa,nv,c;
 enddecl;
 read(a);
 read(b);

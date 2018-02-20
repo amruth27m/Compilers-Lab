@@ -564,7 +564,7 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 		case VARIABLE: //variables
 			temp->val = 0;
 			temp->type = type;
-			temp->varname = malloc(sizeof(char)*20);
+			temp->varname = malloc(sizeof(char)*strlen(c));
 			strcpy(temp->varname,c);
 			temp->left = temp->right = NULL;
 			break;
