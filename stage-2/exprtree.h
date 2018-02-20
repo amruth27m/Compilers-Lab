@@ -28,7 +28,9 @@ typedef struct tnode{
 	int type;
 	char *varname;
 	int nodetype;
+	struct Gsymbol *Gentry;
 	struct tnode *left, *right,*middle;
+
 }tnode;
 
 struct Gsymbol{
@@ -39,6 +41,8 @@ struct Gsymbol{
 	struct Gsymbol *next;
 }Gsymbol;
 
+
+int get_GsymbolLoc(char *name);
 
 struct varList{
 	char *name;

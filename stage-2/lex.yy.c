@@ -518,9 +518,9 @@ char *yytext;
 #include<stdio.h>
 #include<stdlib.h>
 #include "y.tab.h"
+#include "custom.h"
 int ylineno = 0;
-
-
+extern int decl_block;
 #line 525 "lex.yy.c"
 
 #define INITIAL 0
@@ -867,12 +867,12 @@ YY_RULE_SETUP
 case 14:
 YY_RULE_SETUP
 #line 26 "static.l"
-{return DECL;}
+{decl_block = 1; return DECL;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 27 "static.l"
-{return ENDDECL;}
+{ decl_block = 0;return ENDDECL;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP

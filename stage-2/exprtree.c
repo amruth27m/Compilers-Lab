@@ -2,8 +2,10 @@
 #include<string.h>
 #include<stdlib.h>
 #include "exprtree.h"
+#include "custom.h"
 #define PUSH 1
 #define POP 2
+int decl_block = 0;
 
 reg_index _register_count = 0;
 label_index _label_count = 0;
@@ -119,6 +121,17 @@ struct varList *linkVarNode(struct tnode *id, struct varList *rest){
 	return dummy;
 }
 
+int get_GsymbolLoc(char *name){
+	struct Gsymbol *iter = gsymbol_begin;
+	while(iter!=NULL){
+		if(strcmp(iter->varname,name)==0)
+			break;
+		iter = iter->next;
+	}
+	return iter->binding;
+}
+
+
 void  codeGen(struct tnode *t,FILE* fp){
 	write_header(fp);
 	codeGenTree(t,fp);
@@ -156,7 +169,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 		case VARIABLE: 
 			//variables
 			p = getReg();
-			loc = 4096 + (int)((t->varname)[0]) - 'a';
+			loc = get_GsymbolLoc(t->varname);
 			fprintf(fp, "MOV R%d, [%d]\n",p,loc);
 			return p;
 
@@ -282,7 +295,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			switch(t->nodetype){
 			
 				case 'r' :	
-			 			loc = 4096 + (int)(((t->left->varname)[0])) - 'a';
+			 			loc = get_GsymbolLoc(t->left->varname);
 						p = getReg();
 						fprintf(fp,"MOV R%d, %d\n",p,loc);
 						system_call(fp,7,p,0);
@@ -555,13 +568,23 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 	
 	struct tnode* temp = malloc(sizeof(struct tnode));
 
+	struct Gsymbol *symbol_temp;
 	switch(type){
 		case NUMERIC_CONSTANT: //constants 
 			temp->val = val;
 			temp->type = type;
 			temp->left = temp->right = NULL;
 			break;
-		case VARIABLE: //variables
+		case VARIABLE: //variables	
+			if(!decl_block){
+			symbol_temp = lookup(c);
+			if(symbol_temp==NULL){
+				printf("%s not declared before use \n",c);
+				exit(-1);
+			}
+			else
+			temp->Gentry = symbol_temp; 
+			}
 			temp->val = 0;
 			temp->type = type;
 			temp->varname = malloc(sizeof(char)*strlen(c));
