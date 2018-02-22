@@ -40,10 +40,12 @@ stmt: inputstmt {$$ = $1;}
 	| Declarations {$$ = $1; }
 	;
 inputstmt: READ  '(' ID ')' {$$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
+	| READ '(' ID '[' CONSTANT ']' ')' {$$ = createArrayNode($3,$5->val,NULL,'r');}
 	;
 outputstmt: WRITE '(' E ')' {$$ = createTreeNode(0,5,NULL,'w',$3,NULL);}
 	;
-assignstmt: ID  '='   E  {$$ = createTreeNode(0,2,NULL,'=',$1,$3);}	
+assignstmt: ID  '='   E  {$$ = createTreeNode(0,2,NULL,'=',$1,$3);}
+	| ID '[' CONSTANT ']' '=' E { printf("here");$$ = createArrayNode($1,$3->val,$6,'a');}
 	;
 
 breakstmt: BREAK {$$ = createBreakNode(BREAK_STATEMENT);}
@@ -78,12 +80,15 @@ Decl: Type ' ' Varlist ';' '\n' {createDeclarations($1,$3);}
 Type: 	INT {$$ = $1;}
 	| STR {$$ = $1;}
 
-Varlist: ID ',' Varlist {$$ = linkVarNode($1,$3);}
-	| ID {$$ = createVarNode($1);}
+Varlist: ID ',' Varlist {$$ = linkVarNode($1,$3,1);}
+	|ID '[' CONSTANT ']' ',' Varlist {linkVarNode($1,$6,$3->val);}
+	| ID {$$ = createVarNode($1,1);}
+	| ID '[' CONSTANT ']' {$$ = createVarNode($1,$3->val);}
 
 
 
 f:	ID {$$ = $1;}
+	|ID '[' CONSTANT ']' {$$ = createArrayNode($1,$3->val,NULL,'i');}
 	| CONSTANT {$$ = $1;}
 	;
 %%

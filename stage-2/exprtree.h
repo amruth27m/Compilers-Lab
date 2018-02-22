@@ -30,8 +30,10 @@ typedef struct tnode{
 	int nodetype;
 	struct Gsymbol *Gentry;
 	struct tnode *left, *right,*middle;
-
+	int *index_x,*index_y;
 }tnode;
+
+
 
 struct Gsymbol{
 	char* varname;
@@ -46,6 +48,7 @@ int get_GsymbolLoc(char *name);
 
 struct varList{
 	char *name;
+	int size;
 	struct varList *next;
 };
 

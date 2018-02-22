@@ -1,13 +1,12 @@
 begin
 decl
-int cat,dog;
+int a[10];
 str aaa,nv,c;
 enddecl;
-read(aaa);
-read(cat);
-if(aaa>0)then
-write(aaa);
+a[1]=4;
+if(a[1]>0)then
+write(1);
 else
-write(cat);
+write(10);
 endif;
 end;

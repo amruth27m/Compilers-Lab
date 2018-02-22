@@ -42,6 +42,8 @@ extern int decl_block;
 "=" { return *yytext;}
 "\n" { ylineno++; return *yytext;}
 ";" { return *yytext;}
+"[" {return *yytext;}
+"]" {return *yytext;}
 [(), ] {return *yytext;}
 
 . { printf("unknown character");}

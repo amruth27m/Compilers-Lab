@@ -71,7 +71,7 @@ void createDeclarations(int type,struct varList *list){
 			continue;
 		}
 		else{
-			initVariable(list->name,type,1);
+			initVariable(list->name,type,list->size);
 			list = list->next;
 		}
 	}	
@@ -105,18 +105,20 @@ void initVariable(char *name, int type,int size){
 	}
 }
 
-struct varList *createVarNode(struct tnode *temp){
+struct varList *createVarNode(struct tnode *temp,int size){
 	struct varList *dummy = malloc(sizeof(struct varList));
 	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
 	strcpy((dummy->name),temp->varname);
+	dummy->size = size;
 	dummy->next = NULL;
 	return dummy;
 }
 
-struct varList *linkVarNode(struct tnode *id, struct varList *rest){
+struct varList *linkVarNode(struct tnode *id, struct varList *rest,int size){
 	struct varList *dummy = malloc(sizeof(struct varList));
 	dummy->name = malloc(sizeof(char)*strlen(id->varname));
 	strcpy((dummy->name),id->varname);
+	dummy->size = size;
 	dummy->next = rest;
 	return dummy;
 }
@@ -163,6 +165,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 	switch(t->type){
 		case NUMERIC_CONSTANT: //constants
 			p = getReg();
+			printf("%d const\n",t->val);
 			fprintf(fp,"MOV R%d, %d\n",p,t->val);
 			return p;
 
@@ -170,6 +173,11 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			//variables
 			p = getReg();
 			loc = get_GsymbolLoc(t->varname);
+			if(t->index_x!=NULL)
+				loc += *(t->index_x);
+			//if(t->index_y!=NULL)
+			//	loc += *(t->index_y);
+
 			fprintf(fp, "MOV R%d, [%d]\n",p,loc);
 			return p;
 
@@ -235,7 +243,11 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 
 				case '=' :
 						p = codeGenTree(t->right,fp);
-			 			loc = 4096 + (int)(*(t->left->varname)) - 'a';
+						printf("generated code for %d",t->right->val);
+						struct Gsymbol *temp = lookup(t->left->varname);
+						loc = temp->binding;
+						if(t->left->index_x!=NULL)
+							loc += *(t->left->index_x);
 						fprintf(fp,"MOV [%d], R%d\n",loc,p);
 						break;
 			}
@@ -294,8 +306,18 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			//read and write
 			switch(t->nodetype){
 			
-				case 'r' :	
+				case 'r' :
+						
 			 			loc = get_GsymbolLoc(t->left->varname);
+						if((t->left)->index_x!=NULL){
+							loc += *(t->left->index_x);
+							printf("in %s\n",t->left->varname);
+						}
+						else{
+							printf("out %s\n",t->left->varname);
+						}
+						if(t->left->index_y!=NULL)
+							loc += *(t->left->index_y);
 						p = getReg();
 						fprintf(fp,"MOV R%d, %d\n",p,loc);
 						system_call(fp,7,p,0);
@@ -564,6 +586,31 @@ struct tnode* createBreakNode(int type){
 	return temp;
 }
 
+struct tnode* createArrayNode(struct tnode* temp,int index_x,struct tnode* child, int type){
+	switch(type){
+		
+		case 'r':
+			
+			temp->index_x = malloc(sizeof(int));
+			*(temp->index_x) = index_x;
+			printf("test %d",index_x);
+			return createTreeNode(0,5,NULL,'r',temp,NULL);
+			break;
+		case 'i':
+			temp->index_x = malloc(sizeof(int));
+			*(temp->index_x) = index_x;
+			return temp;
+			break;
+		case 'a':
+			printf("inside %d\n",child->val);
+			temp->index_x = malloc(sizeof(int));
+			*(temp->index_x) = index_x;
+			return createTreeNode(0,2,NULL,'=',temp,child);
+			break;
+	}
+	return temp;
+}
+
 struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tnode *l, struct tnode *r){
 	
 	struct tnode* temp = malloc(sizeof(struct tnode));
@@ -582,14 +629,17 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 				printf("%s not declared before use \n",c);
 				exit(-1);
 			}
-			else
-			temp->Gentry = symbol_temp; 
+			else{
+				temp->Gentry = symbol_temp;
+				
+			   }
 			}
 			temp->val = 0;
 			temp->type = type;
 			temp->varname = malloc(sizeof(char)*strlen(c));
 			strcpy(temp->varname,c);
 			temp->left = temp->right = NULL;
+			temp->index_x = temp->index_y = NULL;
 			break;
 		case ARITHEMETIC_EXP: //arithemetic exp
 			if(l->type==LOGICAL_EXP||r->type==LOGICAL_EXP){
@@ -601,6 +651,7 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 			temp->nodetype = nodetype;
 			temp->left = l;
 			temp->right = r;
+			printf("Tree val %d",temp->right->val);
 			break;
 		case EMPTY_NODE: //empty nodes
 			temp->val = 0;
