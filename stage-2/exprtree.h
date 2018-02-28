@@ -37,6 +37,7 @@ struct Gsymbol{
 	int size;
 	int binding;
 	struct Gsymbol *next;
+	int *dim_x,*dim_y;
 }Gsymbol;
 
 

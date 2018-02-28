@@ -1,13 +1,12 @@
-begin
 decl
-int cat,dog;
-str aaa,nv,c;
-enddecl;
-read(a);
-read(b);
-if(a>0)then
-write(a);
+int a,b;
+enddecl
+begin
+read(aaa);
+read(cat);
+if(cat>0)then
+write(cat);
 else
-write(b);
+write(aaa);
 endif;
 end;

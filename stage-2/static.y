@@ -12,19 +12,48 @@ extern int ylineno;
 %nonassoc LT LTE GT GTE EQ NEQ
 %%
 
-program: BEG '\n' slist END '\n'{    
-printf("Evaluation successfully completed");
-$$ = $3;
-FILE *fp = fopen("out","w");
-codeGen($$,fp);
-printSymbolTable();
-exit(1);
-}
-	| BEG '\n'  END  {
-printf("Evaluation successfully completed");
-exit(1);
-}
-;
+program:  GDeclBlock MainBlock {$$ = $2;
+		printf("successfully evaluated the source code\n");
+		FILE *fp = fopen("out","w");
+		codeGen($$,fp);
+		printSymbolTable();
+		exit(1);
+	}
+	| MainBlock {
+		$$ = $1;
+		printf("successfully evaluated the source code\n");
+		FILE *fp = fopen("out","w");
+		codeGen($$,fp);
+		printSymbolTable();
+		exit(1);
+	}
+	;
+
+GDeclBlock: DECL '\n' Declist ENDDECL '\n'{ printf("successfully constructed symbol table\n");}
+	| DECL'\n' ENDDECL '\n'{ printf("successfully constructed symbol table\n"); }
+	;
+
+Declist: Decl ';' '\n' Declist {$$ = $1;} 
+	| Decl ';' '\n' {$$ = $1;}
+
+Decl: Type ' ' Varlist  {createDeclarations($1,$3);}
+
+Type: 	INT {$$ = $1;}
+	| STR {$$ = $1;}
+
+Varlist: ID ',' Varlist {$$ = linkVarNode($1,$3);}
+	| ID {$$ = createVarNode($1);}
+
+
+
+
+MainBlock: BEG '\n' slist END '\n' {
+	$$ = $3;
+	}
+	| BEG '\n' END '\n' {
+	$$ = NULL;	
+	}
+	
 slist: 	stmt ';' '\n' slist { $$ = createTreeNode(0,3,NULL,NULL,$1,$4);}
 	| stmt ';' '\n' { $$ = $1;}
 	;
@@ -37,7 +66,6 @@ stmt: inputstmt {$$ = $1;}
 	| whilestmt {$$ = $1;}
 	| breakstmt {$$ = $1;}
 	| continuestmt {$$ = $1;}
-	| Declarations {$$ = $1; }
 	;
 inputstmt: READ  '(' ID ')' {$$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
 	;
@@ -67,21 +95,6 @@ E: 	  f  PLUS  E  {$$ = createTreeNode(0,2,NULL,'+',$1,$3);}
 	| f { $$ = $1;}
 	| '(' E ')'	{ $$ = $2;}
 	;
-Declarations: DECL '\n' Declist ENDDECL {$$ = $2; }
-	| DECL '\n' ENDDECL {$$ = $1;}
-
-Declist: Decl Declist {$$ = $1;} 
-	| Decl {$$ = $1;}
-
-Decl: Type ' ' Varlist ';' '\n' {createDeclarations($1,$3);}
-
-Type: 	INT {$$ = $1;}
-	| STR {$$ = $1;}
-
-Varlist: ID ',' Varlist {$$ = linkVarNode($1,$3);}
-	| ID {$$ = createVarNode($1);}
-
-
 
 f:	ID {$$ = $1;}
 	| CONSTANT {$$ = $1;}
