@@ -1,13 +1,13 @@
 decl
 int a,b;
-str a,c;
+str c;
 enddecl
 begin
-read(aaa);
-read(cat);
-if(cat>0)then
-write(cat);
+read(a);
+read(c);
+if(a>0)then
+write(a);
 else
-write(aaa);
+write(c);
 endif;
 end;

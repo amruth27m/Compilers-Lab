@@ -567,8 +567,8 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 			temp->val = 0;
 			temp->type = type;
 			temp->varname = malloc(sizeof(char)*strlen(c));
-			if(lookup(c)==NULL&&block_no==1){
-				printf("%s is not declared\n",c);
+			if(lookup(c)==NULL&&block_no==0){
+				printf("%s is not declared : line no %d\n",c);
 				exit(-1);
 			}
 			strcpy(temp->varname,c);

@@ -518,10 +518,11 @@ char *yytext;
 #include<stdio.h>
 #include<stdlib.h>
 #include "y.tab.h"
+#include "custom.h"
 int ylineno = 0;
+int block_no = 1;
 
-
-#line 525 "lex.yy.c"
+#line 526 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -739,10 +740,10 @@ YY_DECL
 		}
 
 	{
-#line 11 "static.l"
+#line 12 "static.l"
 
 
-#line 746 "lex.yy.c"
+#line 747 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -801,181 +802,181 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 13 "static.l"
+#line 14 "static.l"
 { return BEG; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 14 "static.l"
+#line 15 "static.l"
 { return END;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 15 "static.l"
+#line 16 "static.l"
 {  return READ;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 16 "static.l"
+#line 17 "static.l"
 { return WRITE; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 17 "static.l"
+#line 18 "static.l"
 { return IF;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 18 "static.l"
+#line 19 "static.l"
 { return THEN;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 19 "static.l"
+#line 20 "static.l"
 { return ELSE;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 20 "static.l"
+#line 21 "static.l"
 { return ENDIF;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 21 "static.l"
+#line 22 "static.l"
 { return WHILE;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 22 "static.l"
+#line 23 "static.l"
 { return DO;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 23 "static.l"
+#line 24 "static.l"
 { return BREAK;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 24 "static.l"
+#line 25 "static.l"
 { return CONTINUE;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 25 "static.l"
+#line 26 "static.l"
 {return ENDWHILE;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 26 "static.l"
-{return DECL;}
+#line 27 "static.l"
+{block_no = 1; return DECL;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 27 "static.l"
-{return ENDDECL;}
+#line 29 "static.l"
+{block_no = 0; return ENDDECL;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 28 "static.l"
+#line 30 "static.l"
 { yylval = 0; return INT;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 29 "static.l"
+#line 31 "static.l"
 {yylval = 1; return STR;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 30 "static.l"
+#line 32 "static.l"
 { char *s = malloc(sizeof(char)*yyleng); strcpy(s,yytext); yylval = createTreeNode(0,1,s,0,NULL,NULL); return ID;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 31 "static.l"
+#line 33 "static.l"
 {  yylval = createTreeNode(atoi(yytext),0,0,NULL,NULL,NULL); return CONSTANT; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 32 "static.l"
+#line 34 "static.l"
 { return PLUS;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 33 "static.l"
+#line 35 "static.l"
 { return MIN; } 
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 34 "static.l"
+#line 36 "static.l"
 { return MUL;} 
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 35 "static.l"
+#line 37 "static.l"
 { return DIV;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 36 "static.l"
+#line 38 "static.l"
 { return LT;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 37 "static.l"
+#line 39 "static.l"
 { return GT;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 38 "static.l"
+#line 40 "static.l"
 { return LTE;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 39 "static.l"
+#line 41 "static.l"
 { return GTE;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 40 "static.l"
+#line 42 "static.l"
 { return NEQ;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 41 "static.l"
+#line 43 "static.l"
 {return EQ;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 42 "static.l"
+#line 44 "static.l"
 { return *yytext;}
 	YY_BREAK
 case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
-#line 43 "static.l"
+#line 45 "static.l"
 { ylineno++; return *yytext;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 44 "static.l"
+#line 46 "static.l"
 { return *yytext;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 45 "static.l"
+#line 47 "static.l"
 {return *yytext;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 47 "static.l"
+#line 49 "static.l"
 { printf("unknown character");}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 48 "static.l"
+#line 50 "static.l"
 ECHO;
 	YY_BREAK
-#line 979 "lex.yy.c"
+#line 980 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1976,7 +1977,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 48 "static.l"
+#line 50 "static.l"
 
 
 
