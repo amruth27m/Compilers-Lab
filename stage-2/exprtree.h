@@ -46,6 +46,13 @@ struct varList{
 	struct varList *next;
 };
 
+struct varIndex{
+	char *name;
+	int *index;
+	int type;
+	struct varIndex *next;
+};
+
 typedef int reg_index;
 typedef int label_index;
 

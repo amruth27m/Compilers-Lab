@@ -2,6 +2,7 @@
 #include<string.h>
 #include<stdlib.h>
 #include "exprtree.h"
+#include "custom.h"
 #define PUSH 1
 #define POP 2
 
@@ -65,6 +66,7 @@ struct Gsymbol *lookup(char *name){
 void createDeclarations(int type,struct varList *list){
 	while(list!=NULL){
 		if(lookup(list->name)!=NULL){
+			printf("%s already declared\n",list->name);
 			list = list->next;
 			continue;
 		}
@@ -565,6 +567,10 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 			temp->val = 0;
 			temp->type = type;
 			temp->varname = malloc(sizeof(char)*strlen(c));
+			if(lookup(c)==NULL&&block_no==1){
+				printf("%s is not declared\n",c);
+				exit(-1);
+			}
 			strcpy(temp->varname,c);
 			temp->left = temp->right = NULL;
 			break;

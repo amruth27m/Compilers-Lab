@@ -4,7 +4,9 @@
 #define YYSTYPE tnode*
 #include "exprtree.h"
 #include "exprtree.c"
+#include "custom.h"
 extern int ylineno;
+int block_no = 0;
 %}
 %token BEG END READ WRITE ID CONSTANT IF THEN ELSE ENDIF WHILE ENDWHILE DO CONTINUE BREAK DECL ENDDECL INT STR
 %left PLUS MIN
@@ -20,6 +22,7 @@ program:  GDeclBlock MainBlock {$$ = $2;
 		exit(1);
 	}
 	| MainBlock {
+		block_no = 1;
 		$$ = $1;
 		printf("successfully evaluated the source code\n");
 		FILE *fp = fopen("out","w");
