@@ -42,6 +42,10 @@ Type: 	INT {$$ = $1;}
 	| STR {$$ = $1;}
 
 Varlist: ID ',' Varlist {$$ = linkVarNode($1,$3);}
+	| ID '[' CONSTANT ']' ',' Varlist {$$ = linkArrayNode($1,$3->val,$6);}
+	| ID '[' CONSTANT ']' '[' CONSTANT ']' ',' Varlist {$$ = linkMatrixNode($1,$3->val,$6->val,$9);}
+	| ID '[' CONSTANT ']' {$$ = createArrayNode($1,$3->val);}
+	| ID '[' CONSTANT ']' '[' CONSTANT ']' {$$ = createMatrixNode($1,$3->val,$6->val);}
 	| ID {$$ = createVarNode($1);}
 
 
@@ -68,10 +72,14 @@ stmt: inputstmt {$$ = $1;}
 	| continuestmt {$$ = $1;}
 	;
 inputstmt: READ  '(' ID ')' {$$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
+	| READ '(' ID '[' CONSTANT ']' ')' {$3 = appendConstantVal($3,$5->val); $$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
+	| READ '(' ID '[' ID ']' ')' {$3 = appendVariableVal($3,$5->varname); $$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
 	;
 outputstmt: WRITE '(' E ')' {$$ = createTreeNode(0,5,NULL,'w',$3,NULL);}
 	;
 assignstmt: ID  '='   E  {$$ = createTreeNode(0,2,NULL,'=',$1,$3);}	
+	| ID '[' CONSTANT ']' '=' E {$1 = appendConstantVal($1,$3->val); $$ = createTreeNode(0,2,NULL,'=',$1,$6);}
+	| ID '[' ID ']' '=' E {$1 = appendVariableVal($1,$3->varname); $$ = createTreeNode(0,2,NULL,'=',$1,$6);}
 	;
 
 breakstmt: BREAK {$$ = createBreakNode(BREAK_STATEMENT);}
@@ -97,6 +105,8 @@ E: 	  f  PLUS  E  {$$ = createTreeNode(0,2,NULL,'+',$1,$3);}
 	;
 
 f:	ID {$$ = $1;}
+	| ID '[' CONSTANT ']' {$1 = appendConstantVal($1,$3->val); $$ = $1;}
+	| ID '[' ID ']' { $1 = appendVariableVal($1,$3->varname); $$ = $1; } 
 	| CONSTANT {$$ = $1;}
 	;
 %%

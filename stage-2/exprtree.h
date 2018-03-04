@@ -22,6 +22,8 @@
 #define BREAK_EXP 7
 #define BREAK_STATEMENT 0
 #define CONTINUE_STATEMENT 1
+#define INTEGER_INDEX 0
+#define VARIABLE_INDEX 1
 
 typedef struct tnode{
 	int val;
@@ -39,18 +41,19 @@ struct Gsymbol{
 	int size;
 	int binding;
 	struct Gsymbol *next;
-	int *dim_x,*dim_y;
+	struct varIndex *shape;
 }Gsymbol;
 
 
 struct varList{
 	char *name;
+	struct varIndex *index;
 	struct varList *next;
 };
 
 struct varIndex{
 	char *name;
-	int *index;
+	int index;
 	int type;
 	struct varIndex *next;
 };
@@ -71,7 +74,7 @@ struct sys_call_abi{
 //returns pointer to symbol table entry else returns null
 struct Gsymbol *lookup(char *name);
 
-void initVariable(char *name, int type,int size);
+void initVariable(char *name, int type,struct varIndex* shape);
 
 
 struct tnode* makeLeafNode(int n);

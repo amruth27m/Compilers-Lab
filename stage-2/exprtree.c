@@ -6,6 +6,7 @@
 #define PUSH 1
 #define POP 2
 
+int log = 1;
 reg_index _register_count = 0;
 label_index _label_count = 0;
 int _evalarray[26];
@@ -42,6 +43,51 @@ void freeReg(){
 }
 
 
+struct tnode *appendConstantVal(struct tnode* node, int constant){
+	
+	checkIndexValidity(node->varname,constant,1);
+	printf("Appending %d to %s\n",constant,node->varname);
+
+	struct varIndex *temp = malloc(sizeof(struct varIndex));
+	temp->type = INTEGER_INDEX;
+	temp->index = constant;
+	node->arrayIndex = temp;
+	return node;
+}
+
+
+struct tnode *appendVariableVal(struct tnode* node,char *varname){
+	if(log){
+		printf("Appending %s to %s index\n",varname,node->varname);
+	}
+	struct varIndex *temp = malloc(sizeof(struct varIndex));
+	temp->type = VARIABLE_INDEX;
+	temp->name = malloc(sizeof(char)*strlen(varname));
+	strcpy(temp->name,varname);
+	node->arrayIndex = temp;
+	return node;
+}
+
+void checkIndexValidity(char *varname,int constant,int dimension){
+	struct Gsymbol *temp = lookup(varname);
+	struct varIndex *temp1 = temp->shape;	
+	int count = 1;
+	while(count<dimension){
+		if(temp1 == NULL){
+			printf("Invalid index %d for %s\n",constant, varname);
+			exit(-1);
+		}
+		else{
+			count++;
+			temp1 = temp1->next;
+		}
+
+	}
+	if(temp1->index<=constant){
+		printf("Out of boundary index %d for %s\n",constant,varname);
+		exit(-1);
+	}
+}
 
 //function to get the label of current break position
 int current_break(){
@@ -71,7 +117,7 @@ void createDeclarations(int type,struct varList *list){
 			continue;
 		}
 		else{
-			initVariable(list->name,type,1);
+			initVariable(list->name,type,(list->index));
 			list = list->next;
 		}
 	}	
@@ -81,20 +127,40 @@ void printSymbolTable(){
 	struct Gsymbol *iter = gsymbol_begin;
 	printf("\n");
 	while(iter!=NULL){
-		printf("%s %d %d %d\n",iter->varname,iter->type,iter->size,iter->binding);
+		printf("%s %d %d %d",iter->varname,iter->type,iter->size,iter->binding);
+		struct varIndex *temp = iter->shape;
+		int size = 1;
+		while(temp!=NULL){
+			size *= temp->index;
+			temp = temp->next;
+		}
+		printf(" %d\n",size);
 		iter = iter->next;
 	}
 }
 
-void initVariable(char *name, int type,int size){
+void initVariable(char *name, int type,struct varIndex *shape){
 
 	struct Gsymbol *temp = malloc(sizeof(struct Gsymbol));
 	(temp->varname) = malloc(sizeof(char)*strlen(name));
 	strcpy((temp->varname),name);
 	temp->type = type;
-	temp->size = size;
+	
+	//iterating through dimensions
+	struct varIndex *iter = shape;
+	int count = 1,dim = 0;
+	while(iter!=NULL){
+		count *= iter->index;
+		dim++;
+		iter = iter->next;
+	}
+
+	temp->size = count;
+	temp->shape = malloc(sizeof(struct varIndex));
+	temp->shape = shape;
+
 	temp->binding = get_binding_addr();
-	inc_binding_addr(size);
+	inc_binding_addr(temp->size);
 
 	if(gsymbol_cur == NULL){
 		gsymbol_begin = gsymbol_cur = temp;
@@ -110,6 +176,8 @@ struct varList *createVarNode(struct tnode *temp){
 	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
 	strcpy((dummy->name),temp->varname);
 	dummy->next = NULL;
+	dummy->index = malloc(sizeof(struct varIndex));
+	(dummy->index)->index = 1;
 	return dummy;
 }
 
@@ -118,6 +186,79 @@ struct varList *linkVarNode(struct tnode *id, struct varList *rest){
 	dummy->name = malloc(sizeof(char)*strlen(id->varname));
 	strcpy((dummy->name),id->varname);
 	dummy->next = rest;
+	dummy->index = malloc(sizeof(struct varIndex));
+	(dummy->index)->index = 1;
+	return dummy;
+}
+
+struct varList *linkMatrixNode(struct tnode *temp, int index_x,int index_y,struct varList *rest){
+	struct varList *dummy = malloc(sizeof(struct varList));
+	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
+	strcpy(dummy->name,temp->varname);
+	
+	struct varIndex *arraySize_x = malloc(sizeof(struct varIndex));
+	arraySize_x->type = INTEGER_INDEX;
+	arraySize_x->index = index_x;
+
+	struct varIndex *arraySize_y = malloc(sizeof(struct varIndex));
+	arraySize_y->type = INTEGER_INDEX;
+	arraySize_y->index = index_y;
+	arraySize_y->next = NULL;
+	arraySize_x->next = arraySize_y;
+
+	dummy->next = rest;
+	dummy->index = arraySize_x;
+	
+	return dummy;
+
+
+}
+
+struct varList *createMatrixNode(struct tnode *temp,int index_x,int index_y){
+	struct varList *dummy = malloc(sizeof(struct varList));
+	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
+	strcpy(dummy->name,temp->varname);
+	
+	struct varIndex *arraySize_x = malloc(sizeof(struct varIndex));
+	arraySize_x->type = INTEGER_INDEX;
+	arraySize_x->index = index_x;
+
+	struct varIndex *arraySize_y = malloc(sizeof(struct varIndex));
+	arraySize_y->type = INTEGER_INDEX;
+	arraySize_y->index = index_y;
+	arraySize_y->next = NULL;
+	arraySize_x->next = arraySize_y;
+
+	dummy->next = NULL;
+	dummy->index = arraySize_x;
+
+	return dummy;
+
+}
+
+struct varList *createArrayNode(struct tnode *temp,int index){
+	struct varList *dummy = malloc(sizeof(struct varList));
+	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
+	strcpy(dummy->name,temp->varname);
+	struct varIndex *arraySize = malloc(sizeof(struct varIndex));
+	arraySize->type = INTEGER_INDEX;
+	arraySize->index = index;
+	arraySize->next = NULL;
+	dummy->next = NULL;
+	dummy->index = arraySize;
+	return dummy;
+}
+
+struct varList *linkArrayNode(struct tnode *temp,int index,struct tnode *rest){
+	struct varList *dummy = malloc(sizeof(struct varList));
+	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
+	strcpy(dummy->name,temp->varname);
+	struct varIndex *arraySize = malloc(sizeof(struct varIndex));
+	arraySize->type = INTEGER_INDEX;
+	arraySize->index = index;
+	arraySize->next = NULL;
+	dummy->next = rest;
+	dummy->index = arraySize;
 	return dummy;
 }
 
@@ -135,7 +276,16 @@ void write_header(FILE *fp){
  	fprintf(fp, "MOV SP, 4122\n");
 }
 
-
+int dim_mul(int dim,char *varname){
+	if(dim == 1) 
+		return 1;
+	struct varList *shape = (lookup(varname)->shape);
+	dim--;
+	while(dim - 1){
+		shape = shape->next;
+	}
+	return shape->index;
+}
 
 
 
@@ -158,10 +308,34 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 		case VARIABLE: 
 			//variables
 			p = getReg();
-			struct Gsymbol *temp;
-			temp = lookup(t->varname);
-			loc = temp->binding;
-			fprintf(fp, "MOV R%d, [%d]\n",p,loc);
+			struct varIndex *iter = t->arrayIndex;
+			loc = t->Gentry->binding;
+			fprintf(fp, "MOV R%d, %d\n",p,loc);
+			while(iter!=NULL){
+				switch(iter->type){
+					
+					case INTEGER_INDEX:
+						
+						fprintf(fp,"ADD R%d, %d\n",p,iter->index);
+						break;
+
+					case VARIABLE_INDEX:
+						printf("");
+						struct Gsymbol *temp_index = lookup(iter->name);
+						int temp_reg = getReg();
+						fprintf(fp,"MOV R%d, [%d]\n",temp_reg,temp_index->binding);
+						fprintf(fp,"ADD R%d, R%d\n",p,temp_reg);
+						freeReg();
+						break;
+
+
+				}
+				iter = iter->next;
+			
+			}
+			fprintf(fp, "MOV R%d, [R%d]\n",p,p);
+
+
 			return p;
 
 		case ARITHEMETIC_EXP:	
@@ -226,8 +400,31 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 
 				case '=' :
 						p = codeGenTree(t->right,fp);
-			 			loc = 4096 + (int)(*(t->left->varname)) - 'a';
-						fprintf(fp,"MOV [%d], R%d\n",loc,p);
+			 			loc = t->left->Gentry->binding;
+						struct varIndex *iter = t->left->arrayIndex;
+						int temp_reg = getReg();
+						fprintf(fp,"MOV R%d, %d\n",temp_reg,loc);
+						while(iter!=NULL){
+							switch (iter->type){
+								
+								case INTEGER_INDEX:
+									fprintf(fp,"ADD R%d, %d\n",temp_reg,iter->index);
+									break;
+								case VARIABLE_INDEX:
+									printf("");
+									struct Gsymbol *var_loc = lookup(iter->name);
+									
+									int temp_reg2 = getReg();
+									fprintf(fp,"MOV R%d, [%d]\n",temp_reg2,var_loc->binding);
+									fprintf(fp,"ADD R%d, R%d\n",temp_reg,temp_reg2);
+									freeReg();
+									break;
+									
+							}
+							iter = iter->next;
+						}
+
+						fprintf(fp,"MOV [R%d], R%d\n",temp_reg,p);
 						break;
 			}
 			break;
@@ -286,11 +483,50 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			switch(t->nodetype){
 			
 				case 'r' :	
-			 			loc = 4096 + (int)(((t->left->varname)[0])) - 'a';
-						p = getReg();
-						fprintf(fp,"MOV R%d, %d\n",p,loc);
-						system_call(fp,7,p,0);
-						freeReg();
+						printf("inside read");
+						struct varIndex *iter = t->left->arrayIndex;
+						
+						int loc = 0,t_reg,prevLoc=-1,const_flag = 0;
+						loc = t->left->Gentry->binding;
+						int dim = 1;
+						while(iter!=NULL){
+							
+
+							if(iter->type == INTEGER_INDEX){
+								loc += iter->index*dim_mul(dim,t->left->varname);
+								const_flag =  1;
+							}
+							else{
+								t_reg = getReg();
+								int indexLoc = get_binding_addr(iter->name);
+								
+
+								fprintf(fp,"MOV R%d, [%d]\n",t_reg,indexLoc);
+								fprintf(fp,"ADD R%d, loc\n");
+								if(prevLoc!=-1){
+									fprintf(fp, "ADD R%d, R%d\n",prevLoc,t_reg);
+									freeReg();
+								}
+								else{
+									prevLoc = t_reg;
+								}
+							}
+							iter = iter->next;
+							dim++;
+						}
+						if(prevLoc == -1){
+							p = getReg();
+							fprintf(fp,"MOV R%d, %d\n",p,loc);
+							system_call(fp,7,p,0);
+							freeReg();
+						}
+						else{
+							if(!const_flag){
+								system_call(fp,7,t_reg,0);	
+								freeReg();
+							}
+						}
+
 						break;
 
 				case 'w' :	p = codeGenTree(t->left,fp);

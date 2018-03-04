@@ -44,6 +44,8 @@ int block_no = 1;
 "=" { return *yytext;}
 "\n" { ylineno++; return *yytext;}
 ";" { return *yytext;}
+"[" {return *yytext;}
+"]" {return *yytext;}
 [(), ] {return *yytext;}
 
 . { printf("unknown character");}
