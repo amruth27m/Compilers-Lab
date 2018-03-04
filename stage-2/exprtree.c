@@ -158,7 +158,9 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 		case VARIABLE: 
 			//variables
 			p = getReg();
-			loc = 4096 + (int)((t->varname)[0]) - 'a';
+			struct Gsymbol *temp;
+			temp = lookup(t->varname);
+			loc = temp->binding;
 			fprintf(fp, "MOV R%d, [%d]\n",p,loc);
 			return p;
 
@@ -567,10 +569,15 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 			temp->val = 0;
 			temp->type = type;
 			temp->varname = malloc(sizeof(char)*strlen(c));
-			if(lookup(c)==NULL&&block_no==0){
+			struct Gentry *gIndex = lookup(c);
+			
+			if(gIndex==NULL&&block_no==0){
 				printf("%s is not declared : line no %d\n",c);
 				exit(-1);
 			}
+			
+			temp->Gentry = gIndex;
+
 			strcpy(temp->varname,c);
 			temp->left = temp->right = NULL;
 			break;

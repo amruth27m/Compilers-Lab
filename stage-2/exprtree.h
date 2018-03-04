@@ -29,6 +29,8 @@ typedef struct tnode{
 	char *varname;
 	int nodetype;
 	struct tnode *left, *right,*middle;
+	struct Gsymbol *Gentry;
+	struct varIndex *arrayIndex;
 }tnode;
 
 struct Gsymbol{
