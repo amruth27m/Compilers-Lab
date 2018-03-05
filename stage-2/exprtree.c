@@ -16,6 +16,13 @@ struct Gsymbol *gsymbol_cur = NULL;
 binding_addr = 4096;
 
 
+struct varIndex *revShape(struct varIndex *shape){
+	struct varIndex *temp = shape;
+	while(shape!=NULL){
+		
+	}
+}
+
 void inc_binding_addr(int count){
 	binding_addr += count;
 }
@@ -491,6 +498,8 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 						}
 
 						fprintf(fp,"MOV [R%d], R%d\n",temp_reg,p);
+						freeReg();
+						freeReg();
 						break;
 			}
 			break;
@@ -578,6 +587,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 						}
 
 						system_call(fp,7,p,0);
+						freeReg();
 						break;
 
 					/*	printf("inside read");
