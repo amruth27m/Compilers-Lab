@@ -14,9 +14,11 @@
 %%
 (.)*:[\n] {
 	if(pass==1){
-		char t;
-		t = yytext[1];
-		insert(t-'0',currLine);
+		char t[2];
+		for(int i = 1;yytext[i]!='\0';i++){
+			t[i-1] = yytext[i];
+		}
+		insert(atoi(t),currLine);
 	}
 }
 
@@ -32,7 +34,14 @@
 			tempS[i] = yytext[i];
 		}
 		tempS[i]='\0';
-		labelNo = yytext[i+1] - '0';
+		int k = i+1,in_count=0;
+		char a[3];
+
+		while(yytext[k]!='\0'){
+			a[in_count++] = yytext[k++];
+		}
+		a[in_count] = '\0';
+		labelNo = atoi(a);
 			fprintf(fout,"%s%d\n",tempS,search(labelNo));
 		}
 		incLine();

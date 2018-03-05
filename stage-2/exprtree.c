@@ -346,14 +346,17 @@ void write_header(FILE *fp){
 }
 
 int dim_mul(int dim,char *varname){
-	if(dim == 1) 
-		return 1;
+	if(dim == 1){ 
 	struct varList *shape = (lookup(varname)->shape);
-	dim--;
-	while(dim - 1){
-		shape = shape->next;
-	}
+	shape = shape->next;
 	return shape->index;
+	
+	}
+	else{
+		if(dim == 2)
+			return 1;
+	
+	}
 }
 
 
