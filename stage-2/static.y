@@ -74,12 +74,20 @@ stmt: inputstmt {$$ = $1;}
 inputstmt: READ  '(' ID ')' {$$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
 	| READ '(' ID '[' CONSTANT ']' ')' {$3 = appendConstantVal($3,$5->val); $$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
 	| READ '(' ID '[' ID ']' ')' {$3 = appendVariableVal($3,$5->varname); $$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
+	| READ '(' ID '[' CONSTANT ']''[' CONSTANT ']' ')' {$3 = appendDoubleConst($3,$5->val,$8->val); $$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
+	| READ '(' ID '[' ID ']' '[' ID ']' ')' {$3 = appendDoubleVar($3, $5->varname,$8->varname); $$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
+	| READ '(' ID '[' CONSTANT ']' '[' ID ']' ')' {$3 = appendConstVar($3, $5->val,$8->varname);$$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
+	| READ '(' ID '[' ID ']' '[' CONSTANT ']' ')' {$3 = appendVarConst($3,$5->varname,$8->val);$$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
 	;
 outputstmt: WRITE '(' E ')' {$$ = createTreeNode(0,5,NULL,'w',$3,NULL);}
 	;
 assignstmt: ID  '='   E  {$$ = createTreeNode(0,2,NULL,'=',$1,$3);}	
 	| ID '[' CONSTANT ']' '=' E {$1 = appendConstantVal($1,$3->val); $$ = createTreeNode(0,2,NULL,'=',$1,$6);}
 	| ID '[' ID ']' '=' E {$1 = appendVariableVal($1,$3->varname); $$ = createTreeNode(0,2,NULL,'=',$1,$6);}
+	| ID '[' CONSTANT ']' '[' CONSTANT ']' '=' E {$1 = appendDoubleConst($1,$3->val,$6->val);  $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
+	| ID '[' ID ']' '[' ID ']' '=' E {$1 = appendDoubleVar($1,$3->varname,$6->varname); $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
+	| ID '[' ID ']' '[' CONSTANT ']' '=' E {$1 = appendVarConst($1,$3->varname,$6->val);  $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
+	| ID '[' CONSTANT ']' '[' ID ']' '=' E {$1 = appendConstVar($1,$3->val,$6->varname); $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
 	;
 
 breakstmt: BREAK {$$ = createBreakNode(BREAK_STATEMENT);}
@@ -107,6 +115,10 @@ E: 	  f  PLUS  E  {$$ = createTreeNode(0,2,NULL,'+',$1,$3);}
 f:	ID {$$ = $1;}
 	| ID '[' CONSTANT ']' {$1 = appendConstantVal($1,$3->val); $$ = $1;}
 	| ID '[' ID ']' { $1 = appendVariableVal($1,$3->varname); $$ = $1; } 
+	| ID '[' CONSTANT ']' '[' CONSTANT ']' {$1 = appendDoubleConst($1,$3->val,$6->val); $$ = $1;}
+	| ID '[' ID ']' '[' CONSTANT ']' {$1 = appendVarConst($1,$3->varname,$6->val); $$ = $1;}
+	| ID '[' CONSTANT ']' '[' ID ']' {$1 = appendConstVar($1,$3->val,$6->varname); $$ = $1;}
+	| ID '[' ID ']' '[' ID ']' {$1 = appendDoubleVar($1,$3->varname,$6->varname); $$=$1;}
 	| CONSTANT {$$ = $1;}
 	;
 %%
