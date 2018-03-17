@@ -12,7 +12,15 @@ extern int ylineno;
 %nonassoc LT LTE GT GTE EQ NEQ
 %%
 
-program:  GDeclBlock MainBlock {$$ = $2;
+program:  GDeclBlock FdefBlock MainBlock {$$ = $3;
+		printf("successfully evaluated the source code\n");
+		FILE *fp = fopen("out","w");
+		codeGen($$,fp);
+		printSymbolTable();
+		exit(1);
+	}
+	|GDeclBlock MainBlock {
+		$$ = $2;
 		printf("successfully evaluated the source code\n");
 		FILE *fp = fopen("out","w");
 		codeGen($$,fp);
@@ -34,22 +42,52 @@ GDeclBlock: DECL '\n' Declist ENDDECL '\n'{ printf("successfully constructed sym
 	;
 
 Declist: Decl ';' '\n' Declist {$$ = $1;} 
-	| Decl ';' '\n' {$$ = $1;}
+	| Decl ';' '\n' {$$ = $1;printf("Single decl");}
+	;
 
-Decl: Type ' ' Varlist  {createDeclarations($1,$3);}
-
+Decl: Type ' ' Varlist  {createDeclarations($1,$3);printf("type varlist");}
+	;
 Type: 	INT {$$ = $1;}
 	| STR {$$ = $1;}
-
+	;
 Varlist: ID ',' Varlist {$$ = linkVarNode($1,$3);}
 	| ID '[' CONSTANT ']' ',' Varlist {$$ = linkArrayNode($1,$3->val,$6);}
 	| ID '[' CONSTANT ']' '[' CONSTANT ']' ',' Varlist {$$ = linkMatrixNode($1,$3->val,$6->val,$9);}
 	| ID '[' CONSTANT ']' {$$ = createArrayNode($1,$3->val);}
 	| ID '[' CONSTANT ']' '[' CONSTANT ']' {$$ = createMatrixNode($1,$3->val,$6->val);}
-	| ID {$$ = createVarNode($1);}
+	| ID {/*$$ = createVarNode($1);*/}
+	| ID '(' ParamList ')' {$$= createFunctionNode($1,$3->param);}
+	| ID '(' ParamList ')' ',' Varlist {$$ = linkFunctionNode($1,$3->param,$6);}
+	;
 
+FdefBlock: Fdef FdefBlock {}
+	| Fdef {}
+	;
 
+Fdef : Type ' ' ID '(' ParamList ')' '{' '\n' LdeclBlock LMainBlock '}' '\n'  {}
+	;
+LMainBlock: slist {$$ = $1;}
+	| {$$ = NULL;}
 
+ParamList: Param ',' ParamList  {$$ = appendParameterList($1,$3);}
+	 | Param {$$ = $1;}
+	 ;
+
+Param: Type ' ' ID { $$ = createParameterList(1,$3->varname); }
+	;
+
+LdeclBlock: DECL '\n' LdeclList ENDDECL '\n' {}
+	| DECL '\n' ENDDECL '\n' {}
+	;
+
+LdeclList: Ldecl LdeclList {}
+	| Ldecl {}
+	;
+Ldecl: Type IDList {}
+	;
+IDList: ID ',' IDList {}
+	| ID {}
+	;
 
 MainBlock: BEG '\n' slist END '\n' {
 	$$ = $3;
@@ -57,7 +95,7 @@ MainBlock: BEG '\n' slist END '\n' {
 	| BEG '\n' END '\n' {
 	$$ = NULL;	
 	}
-	
+	;
 slist: 	stmt ';' '\n' slist { $$ = createTreeNode(0,3,NULL,NULL,$1,$4);}
 	| stmt ';' '\n' { $$ = $1;}
 	;
@@ -120,7 +158,14 @@ f:	ID {$$ = $1;}
 	| ID '[' CONSTANT ']' '[' ID ']' {$1 = appendConstVar($1,$3->val,$6->varname); $$ = $1;}
 	| ID '[' ID ']' '[' ID ']' {$1 = appendDoubleVar($1,$3->varname,$6->varname); $$=$1;}
 	| CONSTANT {$$ = $1;}
+	| ID '(' ')' {}
+	| ID '(' Arglist ')'
 	;
+
+Arglist: E ',' Arglist {}
+	| E {}
+	;
+
 %%
 
 void yyerror(char *s){

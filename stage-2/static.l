@@ -11,7 +11,7 @@ int block_no = 1;
 
 %%
 
-(begin) { return BEG; }
+(begin) { block_no = 0; return BEG; }
 (end;) { return END;}
 (read) {  return READ;}
 (write) { return WRITE; }
@@ -26,7 +26,7 @@ int block_no = 1;
 (endwhile) {return ENDWHILE;}
 (decl) {block_no = 1; return DECL;}
 
-(enddecl) {block_no = 0; return ENDDECL;}
+(enddecl) {block_no = 1; return ENDDECL;}
 (int) { yylval = 0; return INT;}
 (str) {yylval = 1; return STR;}
 [a-z]+ { char *s = malloc(sizeof(char)*yyleng); strcpy(s,yytext); yylval = createTreeNode(0,1,s,0,NULL,NULL); return ID;}
@@ -47,6 +47,7 @@ int block_no = 1;
 "[" {return *yytext;}
 "]" {return *yytext;}
 [(), ] {return *yytext;}
+[{}] {return *yytext;}
 
 . { printf("unknown character");}
 %%

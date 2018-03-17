@@ -9,12 +9,12 @@
 int log = 1;
 reg_index _register_count = 0;
 label_index _label_count = 0;
+f_label_index _f_label_count = 0;
 int _evalarray[26];
 
 struct Gsymbol *gsymbol_begin = NULL;
 struct Gsymbol *gsymbol_cur = NULL;
 binding_addr = 4096;
-
 
 struct varIndex *revShape(struct varIndex *list){
 	struct varIndex *iter =list;
@@ -37,6 +37,10 @@ int get_binding_addr(){
 	return binding_addr;
 }
 
+//function to get next function label
+f_label_index getFLabel(){
+	return _f_label_count++;
+}
 
 //function to get the next label
 label_index getLabel(){
@@ -55,6 +59,32 @@ void freeReg(){
 	}
 }
 
+
+struct tnode *createParameterList(int type, char *varname){
+	struct tnode *temp1 = malloc(sizeof(struct tnode));
+	struct Paramstruct *temp = malloc(sizeof(struct Paramstruct));
+	temp->type = type;
+	temp->name = malloc(sizeof(char)*strlen(varname));
+	strcpy(temp->name,varname);
+	temp->next = NULL;
+	temp1->param = temp;
+	return temp1;
+}
+
+struct tnode *appendParameterList(struct tnode* param, struct tnode* rest){
+	struct Paramstruct *iter = rest->param;
+	struct Paramstruct *prev = param->param;
+	while(iter!=NULL){
+		struct Paramstruct *temp = malloc(sizeof(struct Paramstruct));
+		temp->type = iter->type;
+		temp->name = malloc(sizeof(char)*strlen(iter->name));
+		strcpy(temp->name,iter->name);
+		prev->next = temp;
+		prev = temp;
+		iter = iter->next;
+	}
+	return param;
+}
 
 struct tnode *appendConstantVal(struct tnode* node, int constant){
 	
@@ -195,7 +225,12 @@ void createDeclarations(int type,struct varList *list){
 			continue;
 		}
 		else{
-			initVariable(list->name,type,(list->index));
+			if(list->paramlist!=NULL){
+				initFunction(list->name,type,list->paramlist);
+			}
+			else{
+				initVariable(list->name,type,(list->index));
+			}
 			list = list->next;
 		}
 	}	
@@ -207,6 +242,13 @@ void printSymbolTable(){
 	printf("\n");
 	while(iter!=NULL){
 		printf("%s %d %d %d",iter->varname,iter->type,iter->size,iter->binding);
+		if(iter->paramlist!=NULL){
+			struct Paramstruct *temp = iter->paramlist;
+			while(temp!=NULL){
+				printf("%s ",(temp->name));
+				temp = temp->next;
+			}
+		}
 		struct varIndex *temp = iter->shape;
 		int size = 1;
 		while(temp!=NULL){
@@ -226,6 +268,8 @@ void initVariable(char *name, int type,struct varIndex *shape){
 	(temp->varname) = malloc(sizeof(char)*strlen(name));
 	strcpy((temp->varname),name);
 	temp->type = type;
+
+	
 	
 	//iterating through dimensions
 	struct varIndex *iter = shape;
@@ -252,6 +296,21 @@ void initVariable(char *name, int type,struct varIndex *shape){
 	}
 }
 
+void initFunction(char *name, int type, struct Paramstruct *paramlist){
+	struct Gsymbol *dummy = malloc(sizeof(struct Gsymbol));
+	dummy->varname = malloc(sizeof(char)*strlen(name));
+	strcpy(dummy->varname,name);
+	dummy->type = type;
+	dummy->paramlist = paramlist;
+	if(gsymbol_cur == NULL){
+		gsymbol_cur = gsymbol_begin = dummy;
+	}
+	else{
+		gsymbol_cur->next = dummy;
+		gsymbol_cur = dummy;
+	}
+}
+
 //create a varlist node
 struct varList *createVarNode(struct tnode *temp){
 	struct varList *dummy = malloc(sizeof(struct varList));
@@ -268,6 +327,7 @@ struct varList *linkVarNode(struct tnode *id, struct varList *rest){
 	struct varList *dummy = malloc(sizeof(struct varList));
 	dummy->name = malloc(sizeof(char)*strlen(id->varname));
 	strcpy((dummy->name),id->varname);
+	dummy->paramlist  = NULL;
 	dummy->next = rest;
 	dummy->index = malloc(sizeof(struct varIndex));
 	(dummy->index)->index = 1;
@@ -280,7 +340,7 @@ struct varList *linkMatrixNode(struct tnode *temp, int index_x,int index_y,struc
 	struct varList *dummy = malloc(sizeof(struct varList));
 	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
 	strcpy(dummy->name,temp->varname);
-	
+	dummy->paramlist = NULL;
 	struct varIndex *arraySize_x = malloc(sizeof(struct varIndex));
 	arraySize_x->type = INTEGER_INDEX;
 	arraySize_x->index = index_x;
@@ -305,7 +365,7 @@ struct varList *createMatrixNode(struct tnode *temp,int index_x,int index_y){
 	struct varList *dummy = malloc(sizeof(struct varList));
 	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
 	strcpy(dummy->name,temp->varname);
-	
+	dummy->paramlist = NULL;
 	struct varIndex *arraySize_x = malloc(sizeof(struct varIndex));
 	arraySize_x->type = INTEGER_INDEX;
 	arraySize_x->index = index_x;
@@ -328,12 +388,31 @@ struct varList *createArrayNode(struct tnode *temp,int index){
 	struct varList *dummy = malloc(sizeof(struct varList));
 	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
 	strcpy(dummy->name,temp->varname);
+	dummy->paramlist = NULL;
 	struct varIndex *arraySize = malloc(sizeof(struct varIndex));
 	arraySize->type = INTEGER_INDEX;
 	arraySize->index = index;
 	arraySize->next = NULL;
 	dummy->next = NULL;
 	dummy->index = arraySize;
+	return dummy;
+}
+
+struct varList *createFunctionNode(struct tnode *name, struct Paramstruct *params){
+	struct varList *dummy = malloc(sizeof(struct varList));
+	dummy->name = malloc(sizeof(char)*strlen(name->varname));
+	strcpy(dummy->name,name->varname);
+	dummy->paramlist = params;
+	dummy->next = NULL;
+	return dummy;
+}
+
+struct varList *linkFunctionNode(struct tnode *name,struct Paramstruct *params, struct varList *rest){
+	struct varList *dummy = malloc(sizeof(struct varList));
+	dummy->name = malloc(sizeof(char)*strlen(name->varname));
+	strcpy(dummy->name,name->varname);
+	dummy->paramlist = params;
+	dummy->next = rest;
 	return dummy;
 }
 

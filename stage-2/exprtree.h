@@ -24,6 +24,8 @@
 #define CONTINUE_STATEMENT 1
 #define INTEGER_INDEX 0
 #define VARIABLE_INDEX 1
+#define TYPE_INTEGER 0
+#define TYPE_STRING 1
 
 typedef struct tnode{
 	int val;
@@ -31,8 +33,9 @@ typedef struct tnode{
 	char *varname;
 	int nodetype;
 	struct tnode *left, *right,*middle;
-	struct Gsymbol *Gentry;
+	struct Gsymbol *Gentry;			
 	struct varIndex *arrayIndex;
+	struct Paramstruct *param;
 }tnode;
 
 struct Gsymbol{
@@ -40,15 +43,32 @@ struct Gsymbol{
 	int type;
 	int size;
 	int binding;
-	struct Gsymbol *next;
+	struct Gsymbol *next;			//pointer to the next global symobol table entry
 	struct varIndex *shape;
+	int flabel;				//label for identifying starting address of a functions code
+	struct Paramstruct *paramlist;		//pointer to head of the formal parameter list in case of functions
 }Gsymbol;
+
+struct Paramstruct{
+	char *name;
+	int type;
+	struct Paramstruct *next;
+};
+
+struct Lsymbol{
+	char *varname;
+	int type;
+	int binding;
+	struct Lsymbol *next;
+};
+
 
 
 struct varList{
 	char *name;
 	struct varIndex *index;
 	struct varList *next;
+	struct Paramstruct *paramlist;
 };
 
 struct varIndex{
@@ -60,7 +80,7 @@ struct varIndex{
 
 typedef int reg_index;
 typedef int label_index;
-
+typedef int f_label_index;
 int break_stack[100];
 int continue_stack[100];
 int break_top,continue_top;
