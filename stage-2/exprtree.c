@@ -16,11 +16,17 @@ struct Gsymbol *gsymbol_cur = NULL;
 binding_addr = 4096;
 
 
-struct varIndex *revShape(struct varIndex *shape){
-	struct varIndex *temp = shape;
-	while(shape!=NULL){
-		
+struct varIndex *revShape(struct varIndex *list){
+	struct varIndex *iter =list;
+	struct varIndex *temp = NULL;
+	while(iter->next!=NULL){
+		struct varIndex *swap = iter->next;
+		iter->next = temp;
+		temp = iter;
+		iter = swap;
 	}
+	iter->next = temp;
+	return iter;
 }
 
 void inc_binding_addr(int count){
@@ -169,6 +175,7 @@ int current_continue(){
 	return continue_stack[continue_top];
 }
 
+//function to lookup for a particular symbol in symbol table
 struct Gsymbol *lookup(char *name){
 	struct Gsymbol *iter = gsymbol_begin;
 	while(iter!=NULL){
@@ -178,6 +185,8 @@ struct Gsymbol *lookup(char *name){
 	}
 	return iter;
 }
+
+//create Declarations for a list of variables
 void createDeclarations(int type,struct varList *list){
 	while(list!=NULL){
 		if(lookup(list->name)!=NULL){
@@ -192,6 +201,7 @@ void createDeclarations(int type,struct varList *list){
 	}	
 }
 
+//print entries in the current symbol table
 void printSymbolTable(){
 	struct Gsymbol *iter = gsymbol_begin;
 	printf("\n");
@@ -208,6 +218,8 @@ void printSymbolTable(){
 	}
 }
 
+
+//initializing a variable
 void initVariable(char *name, int type,struct varIndex *shape){
 
 	struct Gsymbol *temp = malloc(sizeof(struct Gsymbol));
@@ -240,6 +252,7 @@ void initVariable(char *name, int type,struct varIndex *shape){
 	}
 }
 
+//create a varlist node
 struct varList *createVarNode(struct tnode *temp){
 	struct varList *dummy = malloc(sizeof(struct varList));
 	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
@@ -250,6 +263,7 @@ struct varList *createVarNode(struct tnode *temp){
 	return dummy;
 }
 
+//create a varlist node and link it with an existing node
 struct varList *linkVarNode(struct tnode *id, struct varList *rest){
 	struct varList *dummy = malloc(sizeof(struct varList));
 	dummy->name = malloc(sizeof(char)*strlen(id->varname));
@@ -260,6 +274,8 @@ struct varList *linkVarNode(struct tnode *id, struct varList *rest){
 	return dummy;
 }
 
+
+//create a matrix node and link it with an existing varlist node
 struct varList *linkMatrixNode(struct tnode *temp, int index_x,int index_y,struct varList *rest){
 	struct varList *dummy = malloc(sizeof(struct varList));
 	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
@@ -283,6 +299,8 @@ struct varList *linkMatrixNode(struct tnode *temp, int index_x,int index_y,struc
 
 }
 
+
+//create a matrix node
 struct varList *createMatrixNode(struct tnode *temp,int index_x,int index_y){
 	struct varList *dummy = malloc(sizeof(struct varList));
 	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
@@ -305,6 +323,7 @@ struct varList *createMatrixNode(struct tnode *temp,int index_x,int index_y){
 
 }
 
+//create an array node
 struct varList *createArrayNode(struct tnode *temp,int index){
 	struct varList *dummy = malloc(sizeof(struct varList));
 	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
@@ -346,16 +365,15 @@ void write_header(FILE *fp){
 }
 
 int dim_mul(int dim,char *varname){
-	if(dim == 1){ 
 	struct varList *shape = (lookup(varname)->shape);
-	shape = shape->next;
-	return shape->index;
-	
+	if(dim == 1){
+		shape = shape->next;
+		return shape->index;
 	}
 	else{
-		if(dim == 2)
+		if(dim == 2){
 			return 1;
-	
+		}
 	}
 }
 
@@ -387,8 +405,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			while(iter!=NULL){
 				switch(iter->type){
 					
-					case INTEGER_INDEX:
-						
+					case INTEGER_INDEX:	
 						fprintf(fp,"ADD R%d, %d\n",p,iter->index*dim_mul(dim,t->varname));
 						break;
 
@@ -397,6 +414,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 						struct Gsymbol *temp_index = lookup(iter->name);
 						int temp_reg = getReg();
 						fprintf(fp,"MOV R%d, [%d]\n",temp_reg,temp_index->binding);
+						fprintf(fp,"MUL R%d, %d\n",temp_reg,dim_mul(dim,t->varname));
 						fprintf(fp,"ADD R%d, R%d\n",p,temp_reg);
 						freeReg();
 						break;
@@ -491,6 +509,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 									
 									int temp_reg2 = getReg();
 									fprintf(fp,"MOV R%d, [%d]\n",temp_reg2,var_loc->binding);
+									fprintf(fp,"MUL R%d, %d\n",temp_reg2,dim_mul(dim,t->left->varname));
 									fprintf(fp,"ADD R%d, R%d\n",temp_reg,temp_reg2);
 									freeReg();
 									break;
@@ -578,6 +597,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 									int temp_reg = getReg();
 									struct Gsymbol *var_loc = lookup(iter->name);
 									fprintf(fp,"MOV R%d, [%d]\n",temp_reg,var_loc->binding);
+									fprintf(fp, "MUL R%d, %d\n",temp_reg,dim_mul(dim,t->left->varname));
 									fprintf(fp,"ADD R%d, R%d\n",p,temp_reg);
 									freeReg();
 									break;

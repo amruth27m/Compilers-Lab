@@ -1,0 +1,8 @@
+decl
+int a[2][2],sum,b[2][2],c[2][2],i,j,k,x,y;
+enddecl
+begin
+read(i);
+a[0][i]=1;
+write(a[0][i]);
+end;
