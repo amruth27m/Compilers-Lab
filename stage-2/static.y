@@ -55,16 +55,22 @@ Varlist: ID ',' Varlist {$$ = linkVarNode($1,$3);}
 	| ID '[' CONSTANT ']' '[' CONSTANT ']' ',' Varlist {$$ = linkMatrixNode($1,$3->val,$6->val,$9);}
 	| ID '[' CONSTANT ']' {$$ = createArrayNode($1,$3->val);}
 	| ID '[' CONSTANT ']' '[' CONSTANT ']' {$$ = createMatrixNode($1,$3->val,$6->val);}
-	| ID {/*$$ = createVarNode($1);*/}
+	| ID {$$ = createVarNode($1);}
 	| ID '(' ParamList ')' {$$= createFunctionNode($1,$3->param);}
 	| ID '(' ParamList ')' ',' Varlist {$$ = linkFunctionNode($1,$3->param,$6);}
+	| MUL ID {$$ = createPointerNode($2);}
+	| MUL ID ',' Varlist {$$ = linkPointerNode($2,$4);}
 	;
 
 FdefBlock: Fdef FdefBlock {}
 	| Fdef {}
 	;
 
-Fdef : Type ' ' ID '(' ParamList ')' '{' '\n' LdeclBlock LMainBlock '}' '\n'  {}
+Fdef : Type ' ' ID '(' ParamList ')' '{' '\n' LdeclBlock LMainBlock '}' '\n'  {	 
+					checkNameEquivalence($3->varname, $5->param);
+					FILE *fp1 = fopen("sample","w");
+					localCodeGen(fp1,$10);
+				}
 	;
 LMainBlock: slist {$$ = $1;}
 	| {$$ = NULL;}
@@ -76,17 +82,21 @@ ParamList: Param ',' ParamList  {$$ = appendParameterList($1,$3);}
 Param: Type ' ' ID { $$ = createParameterList(1,$3->varname); }
 	;
 
-LdeclBlock: DECL '\n' LdeclList ENDDECL '\n' {}
-	| DECL '\n' ENDDECL '\n' {}
+LdeclBlock: DECL '\n' LdeclList   ENDDECL '\n' {$$ = $3;
+		createLocalSymbolTable(NULL,$3);
+		printLocalDecl();
+	}
+
+	| DECL '\n' ENDDECL '\n' {$$ = NULL;}
 	;
 
-LdeclList: Ldecl LdeclList {}
-	| Ldecl {}
+LdeclList: Ldecl  LdeclList {$$ = linkTypeVarList($1,$2);}
+	| Ldecl   {$$ = $1;}
 	;
-Ldecl: Type IDList {}
+Ldecl: Type ' ' IDList ';' '\n' {$$ = createTypeVarList($1,$3);}
 	;
-IDList: ID ',' IDList {}
-	| ID {}
+IDList: ID ',' IDList {$$ = linkVarNode($1,$3);}
+	| ID {$$ = createVarNode($1);}
 	;
 
 MainBlock: BEG '\n' slist END '\n' {
@@ -126,6 +136,7 @@ assignstmt: ID  '='   E  {$$ = createTreeNode(0,2,NULL,'=',$1,$3);}
 	| ID '[' ID ']' '[' ID ']' '=' E {$1 = appendDoubleVar($1,$3->varname,$6->varname); $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
 	| ID '[' ID ']' '[' CONSTANT ']' '=' E {$1 = appendVarConst($1,$3->varname,$6->val);  $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
 	| ID '[' CONSTANT ']' '[' ID ']' '=' E {$1 = appendConstVar($1,$3->val,$6->varname); $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
+	| ID '=' '&' ID '\n'  {$$ = createTreeNode(1,2,NULL,'=',$1,$4);}
 	;
 
 breakstmt: BREAK {$$ = createBreakNode(BREAK_STATEMENT);}

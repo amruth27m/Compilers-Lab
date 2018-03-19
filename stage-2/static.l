@@ -5,6 +5,7 @@
 #include "custom.h"
 int ylineno = 0;
 int block_no = 1;
+int prev_block = 1;
 
 %}
 
@@ -24,9 +25,9 @@ int block_no = 1;
 (break) { return BREAK;}
 (continue) { return CONTINUE;}
 (endwhile) {return ENDWHILE;}
-(decl) {block_no = 1; return DECL;}
+(decl) { prev_block = block_no; block_no = 1; return DECL;}
 
-(enddecl) {block_no = 1; return ENDDECL;}
+(enddecl) {block_no = prev_block; return ENDDECL;}
 (int) { yylval = 0; return INT;}
 (str) {yylval = 1; return STR;}
 [a-z]+ { char *s = malloc(sizeof(char)*yyleng); strcpy(s,yytext); yylval = createTreeNode(0,1,s,0,NULL,NULL); return ID;}
@@ -47,7 +48,9 @@ int block_no = 1;
 "[" {return *yytext;}
 "]" {return *yytext;}
 [(), ] {return *yytext;}
-[{}] {return *yytext;}
+[&] {return *yytext;}
+"{" {prev_block = block_no; block_no = 2;return *yytext;}
+"}" {block_no = prev_block; return *yytext;}
 
 . { printf("unknown character");}
 %%

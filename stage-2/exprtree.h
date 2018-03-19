@@ -26,6 +26,7 @@
 #define VARIABLE_INDEX 1
 #define TYPE_INTEGER 0
 #define TYPE_STRING 1
+#define TYPE_POINTER 9
 
 typedef struct tnode{
 	int val;
@@ -34,8 +35,10 @@ typedef struct tnode{
 	int nodetype;
 	struct tnode *left, *right,*middle;
 	struct Gsymbol *Gentry;			
+	struct Lsymbol *Lentry;
 	struct varIndex *arrayIndex;
 	struct Paramstruct *param;
+	struct typeVarList *typeList;
 }tnode;
 
 struct Gsymbol{
@@ -58,6 +61,7 @@ struct Paramstruct{
 struct Lsymbol{
 	char *varname;
 	int type;
+	int size;
 	int binding;
 	struct Lsymbol *next;
 };
@@ -66,9 +70,16 @@ struct Lsymbol{
 
 struct varList{
 	char *name;
+	int type;
 	struct varIndex *index;
 	struct varList *next;
 	struct Paramstruct *paramlist;
+};
+
+struct typeVarList{
+	int type;
+	struct varList *vars;
+	struct typeVarList *next;
 };
 
 struct varIndex{

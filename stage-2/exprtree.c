@@ -11,10 +11,14 @@ reg_index _register_count = 0;
 label_index _label_count = 0;
 f_label_index _f_label_count = 0;
 int _evalarray[26];
+int l_binding_addr = 0;
 
 struct Gsymbol *gsymbol_begin = NULL;
 struct Gsymbol *gsymbol_cur = NULL;
 binding_addr = 4096;
+struct Lsymbol *lsymbol_begin = NULL;
+struct Lsymbol *lsymbol_cur = NULL;
+
 
 struct varIndex *revShape(struct varIndex *list){
 	struct varIndex *iter =list;
@@ -60,6 +64,21 @@ void freeReg(){
 }
 
 
+struct tnode  *createTypeVarList(int type,struct varList *vars){
+	struct tnode *dummy = malloc(sizeof(struct tnode));
+	dummy->typeList = malloc(sizeof(struct typeVarList));
+	dummy->typeList->type = type;
+	dummy->typeList->vars = vars;
+	dummy->typeList->next = NULL;
+	return dummy;
+}
+
+struct tnode *linkTypeVarList(struct tnode *first, struct tnode *rest){
+	struct typeVarList *iter = rest->typeList;
+	first->typeList->next = iter;
+	return first;
+}
+
 struct tnode *createParameterList(int type, char *varname){
 	struct tnode *temp1 = malloc(sizeof(struct tnode));
 	struct Paramstruct *temp = malloc(sizeof(struct Paramstruct));
@@ -69,6 +88,72 @@ struct tnode *createParameterList(int type, char *varname){
 	temp->next = NULL;
 	temp1->param = temp;
 	return temp1;
+}
+
+void createLocalSymbolTable(char *name,struct tnode *list){
+	l_binding_addr = 0;
+	lsymbol_begin = NULL;
+	lsymbol_cur = NULL;
+	struct typeVarList *iter = list->typeList;
+	while(iter!=NULL){
+
+		createLocalDecl(iter->type,iter->vars);
+		iter = iter->next;
+	}
+}
+
+void createLocalDecl(int type,struct varList *list){
+	struct varList *iter = list;
+	while(iter!=NULL){
+		struct Lsymbol *dummy = malloc(sizeof(struct Lsymbol));
+		dummy->type = type;
+		dummy->varname = malloc(sizeof(char)*strlen(iter->name));
+		strcpy(dummy->varname,iter->name);
+		dummy->size = 1;
+		dummy->binding = l_binding_addr++;
+		
+		if(lsymbol_begin == lsymbol_cur && lsymbol_cur == NULL){
+			lsymbol_begin = lsymbol_cur = dummy;
+		}
+		else{
+			lsymbol_cur->next = dummy;
+			lsymbol_cur = dummy;
+		}
+
+		iter = iter->next;
+	}
+}
+
+void printLocalDecl(){
+	struct Lsymbol *iter = lsymbol_begin;
+	while(iter!=NULL){
+		
+		printf("%s %d %d\n",iter->varname,iter->type,iter->binding);
+			
+		iter = iter->next;
+	}
+}
+
+void checkNameEquivalence(char *name, struct Paramstruct *params){
+	struct Gsymbol *dummy = lookup(name);
+	if(dummy==NULL){
+		printf("%s is not declared \n",name);
+		exit(-1);
+	}
+	struct Paramstruct *list = dummy->paramlist;
+	while(list!=NULL&&params!=NULL){
+		if(list->type!=params->type||strcmp(list->name,params->name)!=0){
+			printf("%s declaration and definition is ambigous for parameter %s\n",name,list->name);
+			exit(-1);
+		}
+		list = list->next;
+		params = params->next;
+		
+	}
+	if(list!=NULL||params!=NULL){
+		printf("parameter count not matching for function %s\n",name);
+		exit(-1);
+	}
 }
 
 struct tnode *appendParameterList(struct tnode* param, struct tnode* rest){
@@ -216,6 +301,16 @@ struct Gsymbol *lookup(char *name){
 	return iter;
 }
 
+struct Lsymbol *localLookup(char *name){
+	struct Lsymbol *iter = lsymbol_begin;
+	while(iter!=NULL){
+		if(strcmp(iter->varname,name)==0)
+			return iter;
+		iter = iter->next;
+	}
+	return iter;
+}
+
 //create Declarations for a list of variables
 void createDeclarations(int type,struct varList *list){
 	while(list!=NULL){
@@ -229,7 +324,12 @@ void createDeclarations(int type,struct varList *list){
 				initFunction(list->name,type,list->paramlist);
 			}
 			else{
-				initVariable(list->name,type,(list->index));
+				if(list->type == TYPE_POINTER){
+					initVariable(list->name,list->type,(list->index));
+				}
+				else{
+					initVariable(list->name,type,(list->index));
+				}
 			}
 			list = list->next;
 		}
@@ -416,6 +516,26 @@ struct varList *linkFunctionNode(struct tnode *name,struct Paramstruct *params, 
 	return dummy;
 }
 
+struct varList *createPointerNode(struct tnode *name){
+	struct varList *dummy = malloc(sizeof(struct varList));
+	dummy->name = malloc(sizeof(char)*strlen(name->varname));
+	strcpy(dummy->name,name->varname);
+	dummy->type = TYPE_POINTER;
+	dummy->paramlist = NULL;
+	dummy->next = NULL;
+	return dummy;
+}
+
+struct varList *linkPointerNode(struct tnode *name, struct varList *rest){
+	struct varList *dummy = malloc(sizeof(struct varList));
+	dummy->name = malloc(sizeof(char)*strlen(name->varname));
+	strcpy(dummy->name,name->varname);
+	dummy->type = TYPE_POINTER;
+	dummy->next = rest;
+	dummy->paramlist = NULL;
+	return dummy;
+}
+
 struct varList *linkArrayNode(struct tnode *temp,int index,struct tnode *rest){
 	struct varList *dummy = malloc(sizeof(struct varList));
 	dummy->name = malloc(sizeof(char)*strlen(temp->varname));
@@ -426,6 +546,7 @@ struct varList *linkArrayNode(struct tnode *temp,int index,struct tnode *rest){
 	arraySize->next = NULL;
 	dummy->next = rest;
 	dummy->index = arraySize;
+	dummy->paramlist = NULL;
 	return dummy;
 }
 
@@ -436,6 +557,187 @@ void  codeGen(struct tnode *t,FILE* fp){
 	
 }
 
+
+void localCodeGen(struct tnode *t, FILE *fp){
+	localCodeGenTree(t,fp);
+}
+
+reg_index localCodeGenTree(struct tnode *t, FILE *fp){
+	if(t==NULL){
+		return -1;
+	}
+	int p,loc,q;
+	switch(t->type){
+		case NUMERIC_CONSTANT:
+			p = getReg();
+			fprintf(fp,"MOV R%d, %d\n",p,t->val);
+			return p;
+		case VARIABLE:
+			p = getReg();
+			struct Lsymbol *location = t->Lentry;
+			int index = location->binding;
+			fprintf(fp,"MOV R%d, %d\n",p,index);
+			fprintf(fp,"ADD R%d, BP\n");
+			fprintf(fp,"MOV R%d, [R%d]\n",p,p);
+			return p;
+		case ARITHEMETIC_EXP:
+			switch(t->nodetype){
+				case '+':
+					p = localCodeGenTree(t->left,fp);
+					q = localCodeGenTree(t->right,fp);
+					if(p<q){
+						fprintf(fp,"ADD R%d, R%d\n",p,q);
+						freeReg();
+						return p;
+					}
+					else{
+						fprintf(fp, "ADD R%d, R%d\n",q,p);
+						freeReg();
+						return p;
+					}
+
+					break;
+
+				case '-':
+					p = localCodeGenTree(t->left,fp);
+					q = localCodeGenTree(t->right,fp);
+					if(p<q){
+						fprintf(fp,"SUB R%d, R%d\n",p,q);
+						freeReg();
+						return p;
+					}
+					else{
+						fprintf(fp, "SUB R%d, R%d\n",q,p);
+						freeReg();
+						return p;
+					}
+
+					break;
+
+				case '*':
+					p = localCodeGenTree(t->left,fp);
+					q = localCodeGenTree(t->right,fp);
+					if(p<q){
+						fprintf(fp,"MUL R%d, R%d\n",p,q);
+						freeReg();
+						return p;
+					}
+					else{
+						fprintf(fp, "MUL R%d, R%d\n",q,p);
+						freeReg();
+						return p;
+					}
+
+					break;
+
+				case '/':
+					p = localCodeGenTree(t->left,fp);
+					q = localCodeGenTree(t->right,fp);
+					if(p<q){
+						fprintf(fp,"DIV R%d, R%d\n",p,q);
+						freeReg();
+						return p;
+					}
+					else{
+						fprintf(fp, "DIV R%d, R%d\n",q,p);
+						freeReg();
+						return p;
+					}
+
+					break;
+
+				case '=':
+					p = localCodeGenTree(t->right,fp);
+					struct Lsymbol *location = t->left->Lentry;
+					q = getReg();
+					fprintf(fp, "MOV R%d, %d\n",q,location->binding);
+					fprintf(fp, "ADD R%d, BP\n",q);
+					fprintf(fp, "MOV [R%d], R%d\n",q,p);
+					freeReg();
+					freeReg();
+					break;
+			
+
+
+
+			}
+			break;
+
+		case EMPTY_NODE:
+			p = localCodeGenTree(t->left,fp);
+			q = localCodeGenTree(t->right,fp);
+			break;
+
+                case LOGICAL_EXP: //logical operators
+                        p = localCodeGenTree(t->left,fp);
+                        q = localCodeGenTree(t->right,fp);
+                        int opreg,ipreg;
+                        if(p<q){
+                                opreg = p; 
+                                ipreg = q; 
+                        }
+                        else{
+                                opreg = q; 
+                                ipreg = p; 
+                        }
+
+                        switch(t->nodetype){
+     
+                                case CLT: 
+                                        fprintf(fp,"LT R%d, R%d\n",opreg,ipreg);
+                                        break;
+     
+                                case CLTE:
+                                        fprintf(fp,"LE R%d, R%d\n",opreg,ipreg);
+                                        break;
+
+                                case CGT: 
+                                        fprintf(fp,"GT R%d, R%d\n",opreg,ipreg);
+                                        break;
+
+                                case CGTE:
+                                        fprintf(fp,"GE R%d, R%d\n",opreg,ipreg);
+                                        break;
+
+                                case CEQ: 
+                                        fprintf(fp,"EQ R%d, R%d\n",opreg,ipreg);
+                                        break;
+
+                                case CNEQ:
+                                        fprintf(fp,"NE R%d, R%d\n",opreg,ipreg);
+                                        break;
+
+                        }
+                        freeReg();
+                        return opreg;
+                        break;
+	
+	
+		case READ_WRITE:
+			switch(t->nodetype){
+				case 'r':
+					printf("");
+					int index = t->left->Lentry->binding;
+					p = getReg();
+					fprintf(fp,"MOV R%d, %d\n",p,index);
+					fprintf(fp,"ADD R%d, BP\n",p);
+					system_call(fp,7,p,0);
+					break;
+
+				case 'w':
+					p = localCodeGenTree(t->left,fp);
+					system_call(fp,5,p,0);
+					break;
+			}
+			break;
+
+			
+
+
+
+			
+	}
+}
 
 
 void write_header(FILE *fp){
@@ -570,6 +872,10 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 
 				case '=' :
 						printf("The value is %d",t->right->val);
+						if(t->val == 1){
+							
+						}
+						else{
 						p = codeGenTree(t->right,fp);
 			 			loc = t->left->Gentry->binding;
 						struct varIndex *iter = t->left->arrayIndex;
@@ -602,6 +908,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 						freeReg();
 						freeReg();
 						break;
+						}
 			}
 			break;
 
@@ -1014,14 +1321,26 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 			temp->val = 0;
 			temp->type = type;
 			temp->varname = malloc(sizeof(char)*strlen(c));
-			struct Gentry *gIndex = lookup(c);
-			
-			if(gIndex==NULL&&block_no==0){
-				printf("%s is not declared : line no %d\n",c);
-				exit(-1);
+			if(block_no == 2){
+				struct Lsymbol *gIndex = localLookup(c);
+				if(gIndex ==NULL){
+					printf("%s is not declared : line no %d\n",c);
+					exit(-1);
+				}
+
+				temp->Lentry = gIndex;
+				temp->Gentry = NULL;
+			}
+			else{
+				struct Gsymbol *gIndex = lookup(c);
+				if(gIndex == NULL&&block_no==0){
+					printf("%s is not declared : line no %d\n",c);
+					exit(-1);
+				}
+				temp->Lentry = NULL;
+				temp->Gentry = gIndex;
 			}
 			
-			temp->Gentry = gIndex;
 
 			strcpy(temp->varname,c);
 			temp->left = temp->right = NULL;
@@ -1031,7 +1350,16 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 				printf("type mismatch\n");
 				exit(-1);
 			}
-			temp->val = 0;
+			temp->val = val;
+			
+			//pointer 
+			if(temp->val == 1){
+				if(0){
+					printf("type mismatch\n");
+					exit(-1);
+				}
+			}
+
 			temp->type = type;
 			temp->nodetype = nodetype;
 			temp->left = l;
