@@ -559,14 +559,15 @@ void  codeGen(struct tnode *t,FILE* fp){
 }
 
 
-void localCodeGen(struct tnode *t, FILE *fp){
+void localCodeGen(struct tnode *t, FILE *fp,struct tnode *name){
+	if(t==NULL){
+		return -1;
+	}
+	fprintf(fp,"F:%d\n",(lookup(name->varname))->flabel);
 	localCodeGenTree(t,fp);
 }
 
 reg_index localCodeGenTree(struct tnode *t, FILE *fp){
-	if(t==NULL){
-		return -1;
-	}
 	int p,loc,q;
 	switch(t->type){
 		case NUMERIC_CONSTANT:

@@ -1,5 +1,5 @@
 decl
-int a(int b,int c),d;
+int a(int b,int c),d,e,f;
 enddecl
 int a(int b,int c){
 decl
@@ -8,6 +8,4 @@ enddecl
 write(c);
 }
 begin
-read(d);
-write(d);
 end;

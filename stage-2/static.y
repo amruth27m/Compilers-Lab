@@ -68,8 +68,8 @@ FdefBlock:Fdef FdefBlock  {}
 
 Fdef : Type ' ' ID '(' ParamList ')' '{' '\n' LdeclBlock LMainBlock '}' '\n'  {	 
 					checkNameEquivalence($3->varname, $5->param);
-					FILE *fp1 = fopen("sample","w");
-					localCodeGen($10,fp1);
+					FILE *fp1 = fopen("out","w");
+					localCodeGen($10,fp1,$3);
 				}
 	;
 LMainBlock: slist {printf("Local statements exists\n");$$ = $1;}
@@ -137,7 +137,13 @@ assignstmt: ID  '='   E  {$$ = createTreeNode(0,2,NULL,'=',$1,$3);}
 	| ID '[' ID ']' '[' CONSTANT ']' '=' E {$1 = appendVarConst($1,$3->varname,$6->val);  $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
 	| ID '[' CONSTANT ']' '[' ID ']' '=' E {$1 = appendConstVar($1,$3->val,$6->varname); $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
 	| ID '=' '&' ID '\n'  {$$ = createTreeNode(1,2,NULL,'=',$1,$4);}
+	| ID '=' ID '(' ' ' Flist ' ' ')' '\n'
 	;
+
+Flist: f ',' Flist {}
+	| f {}
+	;
+
 
 breakstmt: BREAK {$$ = createBreakNode(BREAK_STATEMENT);}
 continuestmt: CONTINUE {$$ = createBreakNode(CONTINUE_STATEMENT);}
@@ -169,13 +175,8 @@ f:	ID {$$ = $1;}
 	| ID '[' CONSTANT ']' '[' ID ']' {$1 = appendConstVar($1,$3->val,$6->varname); $$ = $1;}
 	| ID '[' ID ']' '[' ID ']' {$1 = appendDoubleVar($1,$3->varname,$6->varname); $$=$1;}
 	| CONSTANT {$$ = $1;}
-	| ID '(' ')' {}
-	| ID '(' Arglist ')'
 	;
 
-Arglist: E ',' Arglist {}
-	| E {}
-	;
 
 %%
 
