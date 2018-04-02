@@ -1,17 +1,36 @@
-decl
-int *a,b,factorial(int abc,int cdf),verumkadi(int a,int b);
-enddecl
-int factorial(int abc,int cdf){
-decl
-int abcdef,cat;
-int dog;
-str x;
-enddecl
-cat=1;
-while(cat<4)do
-read(dog);
-cat=cat+1;
-endwhile;
-}
-begin
-end;
+ 0
+ 2056
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ MOV SP, 4122
+MOV R1, 4096
+MOV R2, "Read"
+PUSH R2
+MOV R2, -1
+PUSH R2
+PUSH R1
+PUSH R0
+PUSH R0
+CALL 0
+MOV R1, 4096
+MOV R1, [R1]
+MOV R2, "Write"
+PUSH R2
+MOV R2, -2
+PUSH R2
+PUSH R1
+PUSH R0
+PUSH R0
+CALL 0
+MOV R1, "Exit"
+PUSH R1
+MOV R1, 0
+PUSH R1
+PUSH R0
+PUSH R0
+PUSH R0
+CALL 0

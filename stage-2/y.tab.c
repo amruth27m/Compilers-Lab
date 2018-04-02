@@ -1564,20 +1564,20 @@ yyreduce:
     {	 
 					checkNameEquivalence((yyvsp[-9])->varname, (yyvsp[-7])->param);
 					FILE *fp1 = fopen("sample","w");
-					localCodeGen(fp1,(yyvsp[-2]));
+					localCodeGen((yyvsp[-2]),fp1);
 				}
 #line 1570 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
 #line 75 "static.y" /* yacc.c:1646  */
-    {(yyval) = (yyvsp[0]);}
+    {printf("Local statements exists\n");(yyval) = (yyvsp[0]);}
 #line 1576 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
 #line 76 "static.y" /* yacc.c:1646  */
-    {(yyval) = NULL;}
+    {printf("Empty local statement\n");(yyval) = NULL;}
 #line 1582 "y.tab.c" /* yacc.c:1646  */
     break;
 

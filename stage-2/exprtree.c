@@ -402,6 +402,7 @@ void initFunction(char *name, int type, struct Paramstruct *paramlist){
 	strcpy(dummy->varname,name);
 	dummy->type = type;
 	dummy->paramlist = paramlist;
+	dummy->flabel = getFLabel();
 	if(gsymbol_cur == NULL){
 		gsymbol_cur = gsymbol_begin = dummy;
 	}
@@ -577,7 +578,7 @@ reg_index localCodeGenTree(struct tnode *t, FILE *fp){
 			struct Lsymbol *location = t->Lentry;
 			int index = location->binding;
 			fprintf(fp,"MOV R%d, %d\n",p,index);
-			fprintf(fp,"ADD R%d, BP\n");
+			fprintf(fp,"ADD R%d, BP\n",p);
 			fprintf(fp,"MOV R%d, [R%d]\n",p,p);
 			return p;
 		case ARITHEMETIC_EXP:

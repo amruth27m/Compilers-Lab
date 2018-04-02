@@ -62,18 +62,18 @@ Varlist: ID ',' Varlist {$$ = linkVarNode($1,$3);}
 	| MUL ID ',' Varlist {$$ = linkPointerNode($2,$4);}
 	;
 
-FdefBlock: Fdef FdefBlock {}
+FdefBlock:Fdef FdefBlock  {}
 	| Fdef {}
 	;
 
 Fdef : Type ' ' ID '(' ParamList ')' '{' '\n' LdeclBlock LMainBlock '}' '\n'  {	 
 					checkNameEquivalence($3->varname, $5->param);
 					FILE *fp1 = fopen("sample","w");
-					localCodeGen(fp1,$10);
+					localCodeGen($10,fp1);
 				}
 	;
-LMainBlock: slist {$$ = $1;}
-	| {$$ = NULL;}
+LMainBlock: slist {printf("Local statements exists\n");$$ = $1;}
+	| {printf("Empty local statement\n");$$ = NULL;}
 
 ParamList: Param ',' ParamList  {$$ = appendParameterList($1,$3);}
 	 | Param {$$ = $1;}
