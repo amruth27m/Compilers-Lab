@@ -1806,7 +1806,7 @@ yyreduce:
 
   case 63:
 #line 139 "static.y" /* yacc.c:1646  */
-    {(yyval) = createTreeNode(1,2,NULL,'=',(yyvsp[-4]),(yyvsp[-1]));}
+    {(yyval) = createTreeNode(0,8,NULL,'=',(yyvsp[-4]),(yyvsp[-1]));	}
 #line 1811 "y.tab.c" /* yacc.c:1646  */
     break;
 

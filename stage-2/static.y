@@ -136,7 +136,7 @@ assignstmt: ID  '='   E  {$$ = createTreeNode(0,2,NULL,'=',$1,$3);}
 	| ID '[' ID ']' '[' ID ']' '=' E {$1 = appendDoubleVar($1,$3->varname,$6->varname); $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
 	| ID '[' ID ']' '[' CONSTANT ']' '=' E {$1 = appendVarConst($1,$3->varname,$6->val);  $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
 	| ID '[' CONSTANT ']' '[' ID ']' '=' E {$1 = appendConstVar($1,$3->val,$6->varname); $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
-	| ID '=' '&' ID '\n'  {$$ = createTreeNode(1,2,NULL,'=',$1,$4);}
+	| ID '=' '&' ID '\n'  {$$ = createTreeNode(0,8,NULL,'=',$1,$4);	}
 	| ID '=' ID '(' ' ' Flist ' ' ')' '\n'
 	;
 

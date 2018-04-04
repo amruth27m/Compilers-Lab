@@ -1110,7 +1110,10 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			}
 			break;
 
-					
+		case POINTER_ASSIGNMENT:
+				struct Gsymbol *ptr = lookup(t->right->varname);
+
+			
 	}
 
 }
@@ -1384,6 +1387,18 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 
 		case READ_WRITE: //read and write
 			temp->type = type;
+			temp->nodetype = nodetype;
+			temp->left = l;
+			temp->right = r;
+			break;
+
+		case POINTER_ASSIGNMENT:  // a = &b
+			temp->type = type;
+			struct Gsymbol *varLookup = lookup(r);
+			if(varLookup==NULL||varLookup->type!=TYPE_POINTER){
+				printf("Pointer type error\n");
+				exit(-1);
+			}
 			temp->nodetype = nodetype;
 			temp->left = l;
 			temp->right = r;
