@@ -70,9 +70,8 @@
 #include "exprtree.h"
 #include "exprtree.c"
 extern int ylineno;
-const FILE *fp1 = fopen("out","w");
 
-#line 76 "y.tab.c" /* yacc.c:339  */
+#line 75 "y.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -185,7 +184,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 189 "y.tab.c" /* yacc.c:358  */
+#line 188 "y.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -485,9 +484,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    16,    16,    23,    31,    41,    42,    45,    46,    49,
-      51,    52,    54,    55,    56,    57,    58,    59,    60,    61,
-      62,    63,    66,    67,    70,    75,    76,    78,    79,    82,
+       0,    15,    15,    22,    30,    40,    41,    44,    45,    48,
+      50,    51,    53,    54,    55,    56,    57,    58,    59,    60,
+      61,    62,    65,    66,    69,    75,    76,    78,    79,    82,
       85,    90,    93,    94,    96,    98,    99,   102,   105,   109,
      110,   114,   115,   116,   117,   118,   119,   120,   122,   123,
      124,   125,   126,   127,   128,   130,   132,   133,   134,   135,
@@ -1409,161 +1408,162 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 16 "static.y" /* yacc.c:1646  */
+#line 15 "static.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);
 		printf("successfully evaluated the source code\n");
-		FILE *fp = fopen("out","w");
-		codeGen((yyval),fp1);
+		FILE *fp = fopen("out","a");
+		codeGen((yyval),fp);
 		printSymbolTable();
 		exit(1);
 	}
-#line 1421 "y.tab.c" /* yacc.c:1646  */
+#line 1420 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 23 "static.y" /* yacc.c:1646  */
+#line 22 "static.y" /* yacc.c:1646  */
     {
 		(yyval) = (yyvsp[0]);
 		printf("successfully evaluated the source code\n");
-		FILE *fp = fopen("out","w");
+		FILE *fp = fopen("out","a");
 		codeGen((yyval),fp);
 		printSymbolTable();
 		exit(1);
 	}
-#line 1434 "y.tab.c" /* yacc.c:1646  */
+#line 1433 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 31 "static.y" /* yacc.c:1646  */
+#line 30 "static.y" /* yacc.c:1646  */
     {
 		(yyval) = (yyvsp[0]);
 		printf("successfully evaluated the source code\n");
-		FILE *fp = fopen("out","w");
+		FILE *fp = fopen("out","a");
 		codeGen((yyval),fp);
 		printSymbolTable();
 		exit(1);
 	}
-#line 1447 "y.tab.c" /* yacc.c:1646  */
+#line 1446 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 41 "static.y" /* yacc.c:1646  */
-    { printf("successfully constructed symbol table\n");}
-#line 1453 "y.tab.c" /* yacc.c:1646  */
+#line 40 "static.y" /* yacc.c:1646  */
+    { FILE* fp  = fopen("out","a"); write_header(fp); printf("successfully constructed symbol table\n");}
+#line 1452 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 42 "static.y" /* yacc.c:1646  */
+#line 41 "static.y" /* yacc.c:1646  */
     { printf("successfully constructed symbol table\n"); }
-#line 1459 "y.tab.c" /* yacc.c:1646  */
+#line 1458 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 45 "static.y" /* yacc.c:1646  */
+#line 44 "static.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[-3]);}
-#line 1465 "y.tab.c" /* yacc.c:1646  */
+#line 1464 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 46 "static.y" /* yacc.c:1646  */
+#line 45 "static.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[-2]);printf("Single decl");}
-#line 1471 "y.tab.c" /* yacc.c:1646  */
+#line 1470 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 49 "static.y" /* yacc.c:1646  */
+#line 48 "static.y" /* yacc.c:1646  */
     {createDeclarations((yyvsp[-2]),(yyvsp[0]));printf("type varlist");}
-#line 1477 "y.tab.c" /* yacc.c:1646  */
+#line 1476 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 51 "static.y" /* yacc.c:1646  */
+#line 50 "static.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1483 "y.tab.c" /* yacc.c:1646  */
+#line 1482 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 52 "static.y" /* yacc.c:1646  */
+#line 51 "static.y" /* yacc.c:1646  */
     {(yyval) = (yyvsp[0]);}
-#line 1489 "y.tab.c" /* yacc.c:1646  */
+#line 1488 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 54 "static.y" /* yacc.c:1646  */
+#line 53 "static.y" /* yacc.c:1646  */
     {(yyval) = linkVarNode((yyvsp[-2]),(yyvsp[0]));}
-#line 1495 "y.tab.c" /* yacc.c:1646  */
+#line 1494 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 55 "static.y" /* yacc.c:1646  */
+#line 54 "static.y" /* yacc.c:1646  */
     {(yyval) = linkArrayNode((yyvsp[-5]),(yyvsp[-3])->val,(yyvsp[0]));}
-#line 1501 "y.tab.c" /* yacc.c:1646  */
+#line 1500 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 56 "static.y" /* yacc.c:1646  */
+#line 55 "static.y" /* yacc.c:1646  */
     {(yyval) = linkMatrixNode((yyvsp[-8]),(yyvsp[-6])->val,(yyvsp[-3])->val,(yyvsp[0]));}
-#line 1507 "y.tab.c" /* yacc.c:1646  */
+#line 1506 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 57 "static.y" /* yacc.c:1646  */
+#line 56 "static.y" /* yacc.c:1646  */
     {(yyval) = createArrayNode((yyvsp[-3]),(yyvsp[-1])->val);}
-#line 1513 "y.tab.c" /* yacc.c:1646  */
+#line 1512 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 58 "static.y" /* yacc.c:1646  */
+#line 57 "static.y" /* yacc.c:1646  */
     {(yyval) = createMatrixNode((yyvsp[-6]),(yyvsp[-4])->val,(yyvsp[-1])->val);}
-#line 1519 "y.tab.c" /* yacc.c:1646  */
+#line 1518 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 59 "static.y" /* yacc.c:1646  */
+#line 58 "static.y" /* yacc.c:1646  */
     {(yyval) = createVarNode((yyvsp[0]));}
-#line 1525 "y.tab.c" /* yacc.c:1646  */
+#line 1524 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 60 "static.y" /* yacc.c:1646  */
+#line 59 "static.y" /* yacc.c:1646  */
     {(yyval)= createFunctionNode((yyvsp[-3]),(yyvsp[-1])->param);}
-#line 1531 "y.tab.c" /* yacc.c:1646  */
+#line 1530 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 61 "static.y" /* yacc.c:1646  */
+#line 60 "static.y" /* yacc.c:1646  */
     {(yyval) = linkFunctionNode((yyvsp[-5]),(yyvsp[-3])->param,(yyvsp[0]));}
-#line 1537 "y.tab.c" /* yacc.c:1646  */
+#line 1536 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 62 "static.y" /* yacc.c:1646  */
+#line 61 "static.y" /* yacc.c:1646  */
     {(yyval) = createPointerNode((yyvsp[0]));}
-#line 1543 "y.tab.c" /* yacc.c:1646  */
+#line 1542 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 63 "static.y" /* yacc.c:1646  */
+#line 62 "static.y" /* yacc.c:1646  */
     {(yyval) = linkPointerNode((yyvsp[-2]),(yyvsp[0]));}
-#line 1549 "y.tab.c" /* yacc.c:1646  */
+#line 1548 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 66 "static.y" /* yacc.c:1646  */
+#line 65 "static.y" /* yacc.c:1646  */
     {}
-#line 1555 "y.tab.c" /* yacc.c:1646  */
+#line 1554 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 67 "static.y" /* yacc.c:1646  */
+#line 66 "static.y" /* yacc.c:1646  */
     {}
-#line 1561 "y.tab.c" /* yacc.c:1646  */
+#line 1560 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 70 "static.y" /* yacc.c:1646  */
+#line 69 "static.y" /* yacc.c:1646  */
     {	 
 					checkNameEquivalence((yyvsp[-9])->varname, (yyvsp[-7])->param);
+					FILE *fp1 = fopen("out","a");
 					localCodeGen((yyvsp[-2]),fp1,(yyvsp[-9]));
 				}
 #line 1570 "y.tab.c" /* yacc.c:1646  */

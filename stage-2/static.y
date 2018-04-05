@@ -14,7 +14,7 @@ extern int ylineno;
 
 program:  GDeclBlock FdefBlock MainBlock {$$ = $3;
 		printf("successfully evaluated the source code\n");
-		FILE *fp = fopen("out","w");
+		FILE *fp = fopen("out","a");
 		codeGen($$,fp);
 		printSymbolTable();
 		exit(1);
@@ -22,7 +22,7 @@ program:  GDeclBlock FdefBlock MainBlock {$$ = $3;
 	|GDeclBlock MainBlock {
 		$$ = $2;
 		printf("successfully evaluated the source code\n");
-		FILE *fp = fopen("out","w");
+		FILE *fp = fopen("out","a");
 		codeGen($$,fp);
 		printSymbolTable();
 		exit(1);
@@ -30,14 +30,14 @@ program:  GDeclBlock FdefBlock MainBlock {$$ = $3;
 	| MainBlock {
 		$$ = $1;
 		printf("successfully evaluated the source code\n");
-		FILE *fp = fopen("out","w");
+		FILE *fp = fopen("out","a");
 		codeGen($$,fp);
 		printSymbolTable();
 		exit(1);
 	}
 	;
 
-GDeclBlock: DECL '\n' Declist ENDDECL '\n'{ printf("successfully constructed symbol table\n");}
+GDeclBlock: DECL '\n' Declist ENDDECL '\n'{ FILE* fp  = fopen("out","a"); write_header(fp); printf("successfully constructed symbol table\n");}
 	| DECL'\n' ENDDECL '\n'{ printf("successfully constructed symbol table\n"); }
 	;
 
@@ -68,6 +68,7 @@ FdefBlock:Fdef FdefBlock  {}
 
 Fdef : Type ' ' ID '(' ParamList ')' '{' '\n' LdeclBlock LMainBlock '}' '\n'  {	 
 					checkNameEquivalence($3->varname, $5->param);
+					FILE *fp1 = fopen("out","a");
 					localCodeGen($10,fp1,$3);
 				}
 	;

@@ -552,9 +552,9 @@ struct varList *linkArrayNode(struct tnode *temp,int index,struct tnode *rest){
 }
 
 void  codeGen(struct tnode *t,FILE* fp){
-	write_header(fp);
 	codeGenTree(t,fp);
 	system_call(fp,10,0,0);
+	fclose(fp);
 	
 }
 
@@ -565,6 +565,7 @@ void localCodeGen(struct tnode *t, FILE *fp,struct tnode *name){
 	}
 	fprintf(fp,"F%d:\n",(lookup(name->varname))->flabel);
 	localCodeGenTree(t,fp);
+	fclose(fp);
 }
 
 reg_index localCodeGenTree(struct tnode *t, FILE *fp){
@@ -744,7 +745,7 @@ reg_index localCodeGenTree(struct tnode *t, FILE *fp){
 
 void write_header(FILE *fp){
 	fprintf(fp, " %d\n %d\n %d\n %d\n %d\n %d\n %d\n %d\n ",0,2056,0,0,0,0,0,0);
- 	fprintf(fp, "MOV SP, 4122\n");
+	fclose(fp);
 }
 
 int dim_mul(int dim,char *varname){
