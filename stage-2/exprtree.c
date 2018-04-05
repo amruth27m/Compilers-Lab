@@ -137,7 +137,7 @@ void printLocalDecl(){
 void checkNameEquivalence(char *name, struct Paramstruct *params){
 	struct Gsymbol *dummy = lookup(name);
 	if(dummy==NULL){
-		printf("%s is not declared \n",name);
+		printf("%s is not declared! checkNameEquivalence \n",name);
 		exit(-1);
 	}
 	struct Paramstruct *list = dummy->paramlist;
@@ -563,7 +563,7 @@ void localCodeGen(struct tnode *t, FILE *fp,struct tnode *name){
 	if(t==NULL){
 		return -1;
 	}
-	fprintf(fp,"F:%d\n",(lookup(name->varname))->flabel);
+	fprintf(fp,"F%d:\n",(lookup(name->varname))->flabel);
 	localCodeGenTree(t,fp);
 }
 
@@ -1111,7 +1111,9 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 			break;
 
 		case POINTER_ASSIGNMENT:
+				printf("");
 				struct Gsymbol *ptr = lookup(t->right->varname);
+				break;
 
 			
 	}
@@ -1329,7 +1331,7 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 			if(block_no == 2){
 				struct Lsymbol *gIndex = localLookup(c);
 				if(gIndex ==NULL){
-					printf("%s is not declared : line no %d\n",c);
+					printf("%s is not declared : line no %d createTreeNode\n",c);
 					exit(-1);
 				}
 

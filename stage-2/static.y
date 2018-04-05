@@ -68,7 +68,6 @@ FdefBlock:Fdef FdefBlock  {}
 
 Fdef : Type ' ' ID '(' ParamList ')' '{' '\n' LdeclBlock LMainBlock '}' '\n'  {	 
 					checkNameEquivalence($3->varname, $5->param);
-					FILE *fp1 = fopen("out","w");
 					localCodeGen($10,fp1,$3);
 				}
 	;
@@ -137,12 +136,8 @@ assignstmt: ID  '='   E  {$$ = createTreeNode(0,2,NULL,'=',$1,$3);}
 	| ID '[' ID ']' '[' CONSTANT ']' '=' E {$1 = appendVarConst($1,$3->varname,$6->val);  $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
 	| ID '[' CONSTANT ']' '[' ID ']' '=' E {$1 = appendConstVar($1,$3->val,$6->varname); $$ = createTreeNode(0,2,NULL,'=',$1,$9);}
 	| ID '=' '&' ID '\n'  {$$ = createTreeNode(0,8,NULL,'=',$1,$4);	}
-	| ID '=' ID '(' ' ' Flist ' ' ')' '\n'
 	;
 
-Flist: f ',' Flist {}
-	| f {}
-	;
 
 
 breakstmt: BREAK {$$ = createBreakNode(BREAK_STATEMENT);}
@@ -165,6 +160,12 @@ E: 	  f  PLUS  E  {$$ = createTreeNode(0,2,NULL,'+',$1,$3);}
 	| f  NEQ  E  {$$ = createTreeNode(0,4,NULL,CNEQ,$1,$3);}
 	| f { $$ = $1;}
 	| '(' E ')'	{ $$ = $2;}
+	| ID '(' ')' {}
+	| ID '(' Arglist ')' {}
+	;
+
+Arglist: Arglist ',' E {}
+	| E {}
 	;
 
 f:	ID {$$ = $1;}

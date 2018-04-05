@@ -998,7 +998,7 @@ YY_RULE_SETUP
 case 38:
 YY_RULE_SETUP
 #line 53 "static.l"
-{block_no = prev_block; return *yytext;}
+{block_no = 1; return *yytext;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP

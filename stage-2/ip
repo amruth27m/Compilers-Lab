@@ -1,6 +1,20 @@
 decl
-int a,*p;
+int a,b,fact(int a,int b);
+int square(int a);
 enddecl
+int fact(int a,int b){
+decl
+int a;
+enddecl
+read(a);
+}
+int square(int a){
+decl
+int c;
+enddecl
+read(c);
+}
 begin
 read(a);
+a=fact(a,b);
 end;

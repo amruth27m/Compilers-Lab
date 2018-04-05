@@ -50,7 +50,7 @@ int prev_block = 1;
 [(), ] {return *yytext;}
 [&] {return *yytext;}
 "{" {prev_block = block_no; block_no = 2;return *yytext;}
-"}" {block_no = prev_block; return *yytext;}
+"}" {block_no = 1; return *yytext;}
 
 . { printf("unknown character");}
 %%
