@@ -161,12 +161,12 @@ E: 	  f  PLUS  E  {$$ = createTreeNode(0,2,NULL,'+',$1,$3);}
 	| f  NEQ  E  {$$ = createTreeNode(0,4,NULL,CNEQ,$1,$3);}
 	| f { $$ = $1;}
 	| '(' E ')'	{ $$ = $2;}
-	| ID '(' ')' {}
-	| ID '(' Arglist ')' {}
+	| ID '(' ')' {/*checkFunctionCallEquivalence($1,NULL);*/}
+	| ID '(' Arglist ')' {/*checkFunctionCallEquivalence($1,$3);*/}
 	;
 
-Arglist: Arglist ',' E {}
-	| E {}
+Arglist: Arglist ',' E {linkArgNode($1,$3);}
+	| E {createArgNode($1);}
 	;
 
 f:	ID {$$ = $1;}

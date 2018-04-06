@@ -1,6 +1,7 @@
 decl
 int a,b,fact(int a,int b);
 int square(int a);
+str c;
 enddecl
 int fact(int a,int b){
 decl
@@ -16,5 +17,5 @@ read(c);
 }
 begin
 read(a);
-a=fact(a,b);
+a=fact(c,b);
 end;

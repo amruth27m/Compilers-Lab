@@ -1914,25 +1914,25 @@ yyreduce:
 
   case 81:
 #line 164 "static.y" /* yacc.c:1646  */
-    {}
+    {checkFunctionCallEquivalence((yyvsp[-2]),NULL);}
 #line 1919 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 82:
 #line 165 "static.y" /* yacc.c:1646  */
-    {}
+    {checkFunctionCallEquivalence((yyvsp[-3]),(yyvsp[-1]));}
 #line 1925 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 83:
 #line 168 "static.y" /* yacc.c:1646  */
-    {}
+    {linkArgNode((yyvsp[-2]),(yyvsp[0]));}
 #line 1931 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 84:
 #line 169 "static.y" /* yacc.c:1646  */
-    {}
+    {createArgNode((yyvsp[0]));}
 #line 1937 "y.tab.c" /* yacc.c:1646  */
     break;
 

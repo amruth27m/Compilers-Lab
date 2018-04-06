@@ -64,6 +64,47 @@ void freeReg(){
 }
 
 
+void checkFunctionCallEquivalence(struct tnode* name, struct tnode* arglist){
+	struct Gsymbol *dummy = lookup(name->varname);
+	if(dummy == NULL){
+		printf("Function %s is not defined : checkFunctionCallEquivalence\n",name->varname);
+		exit(-1);
+	}
+	struct Paramstruct *iter_formal = arglist->param;
+	struct Paramstruct *iter_actual = dummy->paramlist;
+	while(iter_formal!=NULL&&iter_actual!=NULL){
+		if(iter_formal->type!=iter_actual->type){
+			printf("Type mismatch in function call %s, types %d and %d : checkNameEquivalence\n",name->varname,iter_formal->type,iter_actual->type);
+			exit(-1);
+		}
+		iter_formal = iter_formal->next;
+		iter_actual = iter_actual->next;
+	}
+	/*if(iter_formal != NULL || iter_actual != NULL){
+		printf("Argument number mismatch in function call %s : checkNameEquivalence\n",name->varname);
+		exit(-1);
+	}*/
+}
+
+struct tnode* createArgNode(struct tnode* exp){
+	struct Paramstruct *dummy = malloc(sizeof(struct Paramstruct));
+	dummy->type = exp->type;
+	dummy->next = NULL;
+	struct tnode *temp = malloc(sizeof(struct tnode));
+	temp->param = dummy;
+	return temp;
+}
+
+struct tnode* linkArgNode(struct tnode* first, struct tnode* last){
+	struct Paramstruct *dummy = malloc(sizeof(struct tnode));
+	dummy->type = last->type;
+	dummy->next = NULL;
+	struct tnode *temp = malloc(sizeof(struct tnode));
+	temp->param = dummy;
+	temp->param->next = first->param;
+	return temp;
+}
+
 struct tnode  *createTypeVarList(int type,struct varList *vars){
 	struct tnode *dummy = malloc(sizeof(struct tnode));
 	dummy->typeList = malloc(sizeof(struct typeVarList));
