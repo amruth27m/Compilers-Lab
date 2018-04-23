@@ -28,6 +28,7 @@
 #define TYPE_INTEGER 0
 #define TYPE_STRING 1
 #define TYPE_POINTER 9
+#define TYPE_RETURN 11
 
 typedef struct tnode{
 	int val;

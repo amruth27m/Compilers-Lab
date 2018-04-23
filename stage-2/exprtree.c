@@ -8,10 +8,10 @@
 
 int log = 1;
 reg_index _register_count = 0;
-label_index _label_count = 0;
+label_index _label_count = 1;
 f_label_index _f_label_count = 0;
 int _evalarray[26];
-int l_binding_addr = 0;
+int l_binding_addr = 1;
 
 struct Gsymbol *gsymbol_begin = NULL;
 struct Gsymbol *gsymbol_cur = NULL;
@@ -63,6 +63,60 @@ void freeReg(){
 	}
 }
 
+struct tnode* createReturnNode(struct tnode* exp){
+	struct tnode *dummy = malloc(sizeof(struct tnode));
+	dummy->type = TYPE_RETURN;
+	dummy->left = exp;
+	dummy->middle = dummy->right = NULL;
+	dummy->Lentry = NULL;
+	return dummy;
+}
+
+struct tnode* createFunctionTreeNode(struct tnode* name, struct tnode* args){
+	name->middle = args;
+	struct Gsymbol *temp = lookup(name->varname);
+	if(temp == NULL){
+		printf("Function %s is not declared : createFunctionNode\n",name->varname);
+		exit(-1);
+	}
+	name->type = temp->type + 100;
+	return name;
+}
+
+struct tnode* appendArrayIndex(struct tnode* exp){
+	exp->arrayIndex = NULL;
+	return exp;
+}
+
+
+void addLocalParams(struct tnode* paramlist){
+	struct Paramstruct *iter = paramlist->param;
+	int count = 0;
+	while(iter!=NULL){
+		count++;
+		iter = iter->next;
+	}
+	iter = paramlist->param;
+	int i = 0;
+	while(iter!=NULL){
+		struct Lsymbol *dummy = malloc(sizeof(struct Lsymbol));
+		dummy->size = 1;
+		dummy->type = iter->type;
+		dummy->binding = -(count + 2 - i);
+		dummy->varname = malloc(sizeof(char)*strlen(iter->name));
+		strcpy(dummy->varname,iter->name);
+		dummy->next = NULL;
+		if(lsymbol_begin == lsymbol_cur && lsymbol_cur == NULL){
+			lsymbol_begin = lsymbol_cur = dummy;
+		}
+		else{
+			lsymbol_cur->next = dummy;
+			lsymbol_cur = dummy;
+		}
+		iter = iter->next;
+		i++;
+	}
+}
 
 void checkFunctionCallEquivalence(struct tnode* name, struct tnode* arglist){
 	struct Gsymbol *dummy = lookup(name->varname);
@@ -96,13 +150,8 @@ struct tnode* createArgNode(struct tnode* exp){
 }
 
 struct tnode* linkArgNode(struct tnode* first, struct tnode* last){
-	struct Paramstruct *dummy = malloc(sizeof(struct tnode));
-	dummy->type = last->type;
-	dummy->next = NULL;
-	struct tnode *temp = malloc(sizeof(struct tnode));
-	temp->param = dummy;
-	temp->param->next = first->param;
-	return temp;
+	first->middle = last;
+	return first;
 }
 
 struct tnode  *createTypeVarList(int type,struct varList *vars){
@@ -132,7 +181,7 @@ struct tnode *createParameterList(int type, char *varname){
 }
 
 void createLocalSymbolTable(char *name,struct tnode *list){
-	l_binding_addr = 0;
+	l_binding_addr = 1;
 	lsymbol_begin = NULL;
 	lsymbol_cur = NULL;
 	struct typeVarList *iter = list->typeList;
@@ -152,6 +201,7 @@ void createLocalDecl(int type,struct varList *list){
 		strcpy(dummy->varname,iter->name);
 		dummy->size = 1;
 		dummy->binding = l_binding_addr++;
+		dummy->next = NULL;
 		
 		if(lsymbol_begin == lsymbol_cur && lsymbol_cur == NULL){
 			lsymbol_begin = lsymbol_cur = dummy;
@@ -389,6 +439,7 @@ void printSymbolTable(){
 				printf("%s ",(temp->name));
 				temp = temp->next;
 			}
+			printf(" Function label: %d ", iter->flabel);
 		}
 		struct varIndex *temp = iter->shape;
 		int size = 1;
@@ -443,7 +494,7 @@ void initFunction(char *name, int type, struct Paramstruct *paramlist){
 	strcpy(dummy->varname,name);
 	dummy->type = type;
 	dummy->paramlist = paramlist;
-	dummy->flabel = getFLabel();
+	dummy->flabel = getLabel();
 	if(gsymbol_cur == NULL){
 		gsymbol_cur = gsymbol_begin = dummy;
 	}
@@ -593,6 +644,7 @@ struct varList *linkArrayNode(struct tnode *temp,int index,struct tnode *rest){
 }
 
 void  codeGen(struct tnode *t,FILE* fp){
+	fprintf(fp,"L0:\n");
 	codeGenTree(t,fp);
 	system_call(fp,10,0,0);
 	fclose(fp);
@@ -604,18 +656,96 @@ void localCodeGen(struct tnode *t, FILE *fp,struct tnode *name){
 	if(t==NULL){
 		return -1;
 	}
-	fprintf(fp,"F%d:\n",(lookup(name->varname))->flabel);
+	localEntryCodeGen(fp,name);
 	localCodeGenTree(t,fp);
 	fclose(fp);
 }
 
+void localEntryCodeGen(FILE *fp, struct tnode *name){	
+	fprintf(fp,"L%d:\n",(lookup(name->varname))->flabel);
+	fprintf(fp,"PUSH BP\n");
+	fprintf(fp,"MOV BP, SP\n");
+	int memory = 0;
+	printf("Name = %s",name->varname);
+	struct Lsymbol *iter = lsymbol_begin;
+	while(iter!=NULL){
+		iter = iter->next;
+		memory++;
+	}
+	int temp_reg = getReg();
+	fprintf(fp,"MOV R%d, SP\n",temp_reg);
+	fprintf(fp,"ADD R%d, %d\n",temp_reg,memory);
+	fprintf(fp,"MOV SP, R%d\n",temp_reg);
+	freeReg();
+}
+
 reg_index localCodeGenTree(struct tnode *t, FILE *fp){
 	int p,loc,q;
+
+
+
+
+	if(t->type >= 100){
+		int count = 0;
+		int function_type = t->type - 100;
+		printf("Function type = %d  :localcodeGenTree\n ",function_type);
+		int reg_rv = getReg();
+		if(reg_rv > 0){
+			register_data_handle(PUSH,fp,0,reg_rv - 1);
+		}
+		struct tnode *iter = t->middle;
+		while(iter!=NULL){
+			count++;
+			int p = localCodeGenTree(iter,fp);
+			fprintf(fp,"PUSH R%d\n",p);  //pushing the evaluated value
+			iter = iter->middle;
+			freeReg();
+		}
+		fprintf(fp,"PUSH R0\n"); //push return value 
+		fprintf(fp,"CALL L%d\n",(lookup(t->varname))->flabel);
+		fprintf(fp,"POP R%d\n",reg_rv);
+		
+		while(count--){
+			fprintf(fp,"POP R%d\n",reg_rv+1);
+		}
+
+		if(reg_rv > 0){
+			register_data_handle(POP,fp,0,reg_rv-1);
+		}
+
+
+
+	}
+
+
+
+	else{
+
 	switch(t->type){
 		case NUMERIC_CONSTANT:
 			p = getReg();
 			fprintf(fp,"MOV R%d, %d\n",p,t->val);
 			return p;
+
+
+		case TYPE_RETURN:
+			p = getReg();
+			p = localCodeGenTree(t->left,fp);
+			q = getReg();
+			fprintf(fp,"MOV R%d, BP\n",q);
+			fprintf(fp,"SUB R%d, 2\n",q);
+			fprintf(fp,"MOV [R%d], R%d\n",q,p);
+			fprintf(fp,"ADD R%d, 1\n",q);
+			fprintf(fp,"MOV R%d, [R%d]\n",p,q);
+			fprintf(fp,"PUSH R%d\n",p);
+			fprintf(fp,"MOV BP, [BP]\n");
+			fprintf(fp,"RET\n");
+			break;
+
+
+
+
+
 		case VARIABLE:
 			p = getReg();
 			struct Lsymbol *location = t->Lentry;
@@ -777,16 +907,86 @@ reg_index localCodeGenTree(struct tnode *t, FILE *fp){
 
 			
 
+		case CONDITIONAL_EXP:
+			switch(t->nodetype){
+				case 1:
+					p = localCodeGenTree(t->left,fp);
+					int elseLabel = getLabel();
+					fprintf(fp,"JZ R%d, L%d\n",p,elseLabel);
+					q = localCodeGenTree(t->middle,fp);
+
+					int afterElseLabel = getLabel();
+					fprintf(fp,"JMP L%d\n",afterElseLabel);
+					fprintf(fp,"L%d:\n",elseLabel);
+					q = localCodeGenTree(t->right,fp);
+					fprintf(fp,"L%d:\n",afterElseLabel);
+					break;
+				case 2:;
+					int whileStartLabel = getLabel();
+					int whileEndLabel = getLabel();
+					
+					break_stack[++break_top] = whileEndLabel;
+					continue_stack[++continue_top] = whileStartLabel;
+
+					fprintf(fp,"L%d:\n",whileStartLabel);
+					p = localCodeGenTree(t->left,fp);
+					fprintf(fp,"JZ R%d, L%d\n",p,whileEndLabel);
+					q = localCodeGenTree(t->right,fp);
+					fprintf(fp,"JMP L%d\n",whileStartLabel);
+					fprintf(fp,"L%d:\n",whileEndLabel);
+					
+					break_top--;
+					continue_top--;
+
+					break;
+				case 3:
+					p = localCodeGenTree(t->left,fp);
+					int afterThenLabel = getLabel();
+					fprintf(fp,"JZ R%d, L%d\n",p,afterThenLabel);
+					q = localCodeGenTree(t->right,fp);
+					fprintf(fp,"L%d:\n",afterThenLabel);
+					break;
+
+			}
+			break;
+		case BREAK_EXP:
+			switch(t->nodetype){
+				case 0:
+					//break;
+					fprintf(fp,"JMP L%d\n",current_break());
+					break;
+				case 1:
+					fprintf(fp,"JMP L%d\n",current_continue());
+					break;
+					//continue;
+			}
+			break;
+
+
+
 
 
 			
-	}
+	}}
 }
 
 
 void write_header(FILE *fp){
 	fprintf(fp, " %d\n %d\n %d\n %d\n %d\n %d\n %d\n %d\n ",0,2056,0,0,0,0,0,0);
+	fprintf(fp, "MOV SP, %d\n", 4096 + globalSTSize());
+	fprintf(fp, "JMP L0\n");
+	fprintf(fp,"MOV BP, SP\n");
 	fclose(fp);
+}
+
+int globalSTSize(){
+	int size = 0;
+	struct Gsymbol *iter = gsymbol_begin;
+	while(iter!=NULL){
+		size++;
+		iter = iter->next;
+	}
+	return size;
 }
 
 int dim_mul(int dim,char *varname){
@@ -813,12 +1013,58 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 
 
 	int p,loc,q;
-	
+	if(t->type >= 100){
+		int count = 0;
+		int function_type = t->type - 100;
+		printf("Function type = %d  :codeGenTree\n ",function_type);
+		int reg_rv = getReg();
+		if(reg_rv > 0){
+			register_data_handle(PUSH,fp,0,reg_rv - 1);
+		}
+		struct tnode *iter = t->middle;
+		while(iter!=NULL){
+			count++;
+			int p = codeGenTree(iter,fp);
+			fprintf(fp,"PUSH R%d\n",p);  //pushing the evaluated value
+			iter = iter->middle;
+			freeReg();
+		}
+		fprintf(fp,"PUSH R0\n"); //push return value 
+		fprintf(fp,"CALL L%d\n",(lookup(t->varname))->flabel);
+		fprintf(fp,"POP R%d\n",reg_rv);
+		
+		while(count--){
+			fprintf(fp,"POP R%d\n",reg_rv+1);
+		}
+
+		if(reg_rv > 0){
+			register_data_handle(POP,fp,0,reg_rv-1);
+		}
+
+
+
+	}
+	else{
 	switch(t->type){
 		case NUMERIC_CONSTANT: //constants
 			p = getReg();
 			fprintf(fp,"MOV R%d, %d\n",p,t->val);
 			return p;
+
+
+		case TYPE_RETURN:
+			p = getReg();
+			p = codeGenTree(t->left,fp);
+			q = getReg();
+			fprintf(fp,"MOV R%d, BP\n",q);
+			fprintf(fp,"SUB R%d, 2\n",q);
+			fprintf(fp,"MOV [R%d], R%d\n",q,p);
+			fprintf(fp,"ADD R%d, 1\n",q);
+			fprintf(fp,"MOV R%d, [R%d]\n",p,q);
+			fprintf(fp,"PUSH R%d\n",p);
+			fprintf(fp,"MOV BP, [BP]\n");
+			fprintf(fp,"RET\n");
+			break;
 
 		case VARIABLE: 
 			//variables
@@ -915,7 +1161,7 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 				
 
 				case '=' :
-						printf("The value is %d",t->right->val);
+						printf("The value is %d\n",t->right->val);
 						if(t->val == 1){
 							
 						}
@@ -1157,9 +1403,9 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 				struct Gsymbol *ptr = lookup(t->right->varname);
 				break;
 
-			
-	}
 
+	}
+	}
 }
 
 
@@ -1373,8 +1619,12 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 			if(block_no == 2){
 				struct Lsymbol *gIndex = localLookup(c);
 				if(gIndex ==NULL){
+					struct Gsymbol *globalIndex = lookup(c);
+					if(globalIndex == NULL){
 					printf("%s is not declared : line no %d createTreeNode\n",c);
 					exit(-1);
+					}
+					
 				}
 
 				temp->Lentry = gIndex;
@@ -1393,6 +1643,7 @@ struct tnode* createTreeNode(int val, int type, char *c,int nodetype, struct tno
 
 			strcpy(temp->varname,c);
 			temp->left = temp->right = NULL;
+			temp->arrayIndex = NULL;
 			break;
 		case ARITHEMETIC_EXP: //arithemetic exp
 			if(l->type==LOGICAL_EXP||r->type==LOGICAL_EXP){

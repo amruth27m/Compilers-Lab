@@ -26,6 +26,7 @@ int prev_block = 1;
 (continue) { return CONTINUE;}
 (endwhile) {return ENDWHILE;}
 (decl) { prev_block = block_no; block_no = 1; return DECL;}
+(return) {return RETURN;}
 
 (enddecl) {block_no = prev_block; return ENDDECL;}
 (int) { yylval = 0; return INT;}

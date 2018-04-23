@@ -1,21 +1,29 @@
 decl
 int a,b,fact(int a,int b);
 int square(int a);
-str c;
 enddecl
 int fact(int a,int b){
 decl
 int a;
 enddecl
+a=fact(a,a);
 read(a);
+if(a<4)then
+read(a);
+else
+write(a);
+endif;
+return a;
 }
 int square(int a){
 decl
-int c;
+int c,d;
 enddecl
-read(c);
+read(d);
+return d;
 }
 begin
 read(a);
-a=fact(c,b);
+a=square(a);
+write(a);
 end;

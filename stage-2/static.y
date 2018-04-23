@@ -6,7 +6,7 @@
 #include "exprtree.c"
 extern int ylineno;
 %}
-%token BEG END READ WRITE ID CONSTANT IF THEN ELSE ENDIF WHILE ENDWHILE DO CONTINUE BREAK DECL ENDDECL INT STR
+%token BEG END READ WRITE ID CONSTANT IF THEN ELSE ENDIF WHILE ENDWHILE DO CONTINUE BREAK DECL ENDDECL INT STR RETURN
 %left PLUS MIN
 %left MUL DIV
 %nonassoc LT LTE GT GTE EQ NEQ
@@ -45,7 +45,7 @@ Declist: Decl ';' '\n' Declist {$$ = $1;}
 	| Decl ';' '\n' {$$ = $1;printf("Single decl");}
 	;
 
-Decl: Type ' ' Varlist  {createDeclarations($1,$3);printf("type varlist");}
+Decl: Type ' ' Varlist  {createDeclarations($1,$3);}
 	;
 Type: 	INT {$$ = $1;}
 	| STR {$$ = $1;}
@@ -70,10 +70,12 @@ Fdef : Type ' ' ID '(' ParamList ')' '{' '\n' LdeclBlock LMainBlock '}' '\n'  {
 					checkNameEquivalence($3->varname, $5->param);
 					FILE *fp1 = fopen("out","a");
 					localCodeGen($10,fp1,$3);
+					addLocalParams($5);
+					printLocalDecl();
 				}
 	;
-LMainBlock: slist {printf("Local statements exists\n");$$ = $1;}
-	| {printf("Empty local statement\n");$$ = NULL;}
+LMainBlock: slist {$$ = $1;}
+	| {$$ = NULL;}
 
 ParamList: Param ',' ParamList  {$$ = appendParameterList($1,$3);}
 	 | Param {$$ = $1;}
@@ -84,7 +86,6 @@ Param: Type ' ' ID { $$ = createParameterList(1,$3->varname); }
 
 LdeclBlock: DECL '\n' LdeclList   ENDDECL '\n' {$$ = $3;
 		createLocalSymbolTable(NULL,$3);
-		printLocalDecl();
 	}
 
 	| DECL '\n' ENDDECL '\n' {$$ = NULL;}
@@ -118,7 +119,11 @@ stmt: inputstmt {$$ = $1;}
 	| whilestmt {$$ = $1;}
 	| breakstmt {$$ = $1;}
 	| continuestmt {$$ = $1;}
+	| returnstmt{$$ = $1;}
 	;
+
+returnstmt: RETURN ' ' E {$$ = createReturnNode($3);}
+
 inputstmt: READ  '(' ID ')' {$$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
 	| READ '(' ID '[' CONSTANT ']' ')' {$3 = appendConstantVal($3,$5->val); $$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
 	| READ '(' ID '[' ID ']' ')' {$3 = appendVariableVal($3,$5->varname); $$ = createTreeNode(0,5,NULL,'r',$3,NULL);}
@@ -161,12 +166,12 @@ E: 	  f  PLUS  E  {$$ = createTreeNode(0,2,NULL,'+',$1,$3);}
 	| f  NEQ  E  {$$ = createTreeNode(0,4,NULL,CNEQ,$1,$3);}
 	| f { $$ = $1;}
 	| '(' E ')'	{ $$ = $2;}
-	| ID '(' ')' {/*checkFunctionCallEquivalence($1,NULL);*/}
-	| ID '(' Arglist ')' {/*checkFunctionCallEquivalence($1,$3);*/}
+	| ID '(' ')' {/*checkFunctionCallEquivalence($1,NULL);*/ $$ = createFunctionTreeNode($1,$3);}
+	| ID '(' Arglist ')' {/*checkFunctionCallEquivalence($1,$3);*/ $$ =  createFunctionTreeNode($1,$3);}
 	;
 
-Arglist: Arglist ',' E {linkArgNode($1,$3);}
-	| E {createArgNode($1);}
+Arglist: E ',' Arglist {$$ = linkArgNode($1,$3);}
+	| E {$$ = $1; $$ = appendArrayIndex($$);}
 	;
 
 f:	ID {$$ = $1;}

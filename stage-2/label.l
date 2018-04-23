@@ -30,7 +30,7 @@
 	} else {
 		int i,j, labelNo;				
 		char tempS[50];
-		for(i=0; i<yyleng && yytext[i]!='L' ; i++){
+		for(i=0; i<yyleng && yytext[i]!='L' && yytext[i]!='F' ; i++){
 			tempS[i] = yytext[i];
 		}
 		tempS[i]='\0';
@@ -46,6 +46,7 @@
 		}
 		incLine();
 }
+
 
 
 .*[\n] {	
