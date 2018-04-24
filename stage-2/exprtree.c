@@ -74,6 +74,7 @@ struct tnode* createReturnNode(struct tnode* exp){
 
 struct tnode* createFunctionTreeNode(struct tnode* name, struct tnode* args){
 	name->middle = args;
+	name->middle->left = name->middle->right = name->middle->middle = NULL;
 	struct Gsymbol *temp = lookup(name->varname);
 	if(temp == NULL){
 		printf("Function %s is not declared : createFunctionNode\n",name->varname);
@@ -90,6 +91,8 @@ struct tnode* appendArrayIndex(struct tnode* exp){
 
 
 void addLocalParams(struct tnode* paramlist){
+	if(paramlist == NULL)
+		return;
 	struct Paramstruct *iter = paramlist->param;
 	int count = 0;
 	while(iter!=NULL){
@@ -156,6 +159,7 @@ struct tnode* linkArgNode(struct tnode* first, struct tnode* last){
 
 struct tnode  *createTypeVarList(int type,struct varList *vars){
 	struct tnode *dummy = malloc(sizeof(struct tnode));
+	dummy->type = -1;
 	dummy->typeList = malloc(sizeof(struct typeVarList));
 	dummy->typeList->type = type;
 	dummy->typeList->vars = vars;
@@ -226,6 +230,8 @@ void printLocalDecl(){
 }
 
 void checkNameEquivalence(char *name, struct Paramstruct *params){
+	if(params == NULL)
+		return;
 	struct Gsymbol *dummy = lookup(name);
 	if(dummy==NULL){
 		printf("%s is not declared! checkNameEquivalence \n",name);
@@ -690,8 +696,9 @@ reg_index localCodeGenTree(struct tnode *t, FILE *fp){
 		int function_type = t->type - 100;
 		printf("Function type = %d  :localcodeGenTree\n ",function_type);
 		int reg_rv = getReg();
+		printf(reg_rv);
 		if(reg_rv > 0){
-			register_data_handle(PUSH,fp,0,reg_rv - 1);
+	//		register_data_handle(PUSH,fp,0,reg_rv - 1);
 		}
 		struct tnode *iter = t->middle;
 		while(iter!=NULL){
@@ -710,7 +717,7 @@ reg_index localCodeGenTree(struct tnode *t, FILE *fp){
 		}
 
 		if(reg_rv > 0){
-			register_data_handle(POP,fp,0,reg_rv-1);
+	//		register_data_handle(POP,fp,0,reg_rv-1);
 		}
 
 
@@ -1010,8 +1017,6 @@ reg_index codeGenTree(struct tnode *t, FILE* fp){
 	if(t == NULL){
 		return -1;
 	}
-
-
 	int p,loc,q;
 	if(t->type >= 100){
 		int count = 0;

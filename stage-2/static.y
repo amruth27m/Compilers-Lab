@@ -56,8 +56,8 @@ Varlist: ID ',' Varlist {$$ = linkVarNode($1,$3);}
 	| ID '[' CONSTANT ']' {$$ = createArrayNode($1,$3->val);}
 	| ID '[' CONSTANT ']' '[' CONSTANT ']' {$$ = createMatrixNode($1,$3->val,$6->val);}
 	| ID {$$ = createVarNode($1);}
-	| ID '(' ParamList ')' {$$= createFunctionNode($1,$3->param);}
-	| ID '(' ParamList ')' ',' Varlist {$$ = linkFunctionNode($1,$3->param,$6);}
+	| ID '(' ParamList ')' {if($3!=NULL) {$$= createFunctionNode($1,$3->param);} else {$$ = createFunctionNode($1,NULL);}}
+	| ID '(' ParamList ')' ',' Varlist {if ($3 != NULL) {$$ = linkFunctionNode($1,$3->param,$6);} else {$$ = linkFunctionNode($1,NULL,$6);}}
 	| MUL ID {$$ = createPointerNode($2);}
 	| MUL ID ',' Varlist {$$ = linkPointerNode($2,$4);}
 	;
@@ -67,7 +67,12 @@ FdefBlock:Fdef FdefBlock  {}
 	;
 
 Fdef : Type ' ' ID '(' ParamList ')' '{' '\n' LdeclBlock LMainBlock '}' '\n'  {	 
-					checkNameEquivalence($3->varname, $5->param);
+					if($5!=NULL){
+						checkNameEquivalence($3->varname, $5->param);
+					}
+					else{
+						checkNameEquivalence($3->varname,NULL);
+					}
 					FILE *fp1 = fopen("out","a");
 					localCodeGen($10,fp1,$3);
 					addLocalParams($5);
@@ -79,6 +84,7 @@ LMainBlock: slist {$$ = $1;}
 
 ParamList: Param ',' ParamList  {$$ = appendParameterList($1,$3);}
 	 | Param {$$ = $1;}
+	 | {$$ = NULL;}
 	 ;
 
 Param: Type ' ' ID { $$ = createParameterList(1,$3->varname); }
@@ -166,12 +172,12 @@ E: 	  f  PLUS  E  {$$ = createTreeNode(0,2,NULL,'+',$1,$3);}
 	| f  NEQ  E  {$$ = createTreeNode(0,4,NULL,CNEQ,$1,$3);}
 	| f { $$ = $1;}
 	| '(' E ')'	{ $$ = $2;}
-	| ID '(' ')' {/*checkFunctionCallEquivalence($1,NULL);*/ $$ = createFunctionTreeNode($1,$3);}
+	| ID '(' ')' {/*checkFunctionCallEquivalence($1,NULL);*/ $$ = createFunctionTreeNode($1,NULL);}
 	| ID '(' Arglist ')' {/*checkFunctionCallEquivalence($1,$3);*/ $$ =  createFunctionTreeNode($1,$3);}
 	;
 
 Arglist: E ',' Arglist {$$ = linkArgNode($1,$3);}
-	| E {$$ = $1; $$ = appendArrayIndex($$);}
+	| E {$$ = $1; $$ = appendArrayIndex($$); }
 	;
 
 f:	ID {$$ = $1;}
